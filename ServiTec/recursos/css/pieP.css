@@ -17144,4 +17144,39 @@ ul {
     ) {
     height: calc(793px - var(--13dc1470));
   }
+  html {min-height: 100%; position: relative;}
+body{
+  background-color: #101010;
+  display:flex;
+  flex-wrap: wrap;
+  justify-content:space-evenly;
+  color: white;
+  font-family: Arial;
+  font-size: min(18px, max(5vw, 13px));
+  
+  margin: 0 0 3.75em 0;
+  user-select: none;
+  text-align: center;
+  overflow-y: scroll;
+}
+
+
+div {
+  background-color: #1f1f1f;
+  height: 50vh;
+  width: 33%;
+  padding: 10px;
+  transition: all 0.5s ease;
+}
+div:hover {height: 105vh;}
+
+
+footer {
+  background-color: #080808;
+  width: 100%;
+  height: 2em;
+  position: absolute;
+  bottom: 0;
+  padding-top: 1em;
+}
     

@@ -324,7 +324,7 @@ body, html {
 <!-- Contact Section -->
 <div class="w3-container w3-light-grey" style="padding:128px 16px" id="contact">
   <h3 class="w3-center">CONTACTO</h3>
-  <p class="w3-center w3-large">Lets get in touch. Send us a message:</p>
+  <p class="w3-center w3-large">Mantengámonos en contacto. Mandanos un mensaje:</p>
   <div style="margin-top:48px">
     <p><i class="fa fa-map-marker fa-fw w3-xxlarge w3-margin-right"></i> Camino hacia las humedades S/N, Salagua, 28869 Manzanillo, Col.</p>
     <p><i class="fa fa-phone fa-fw w3-xxlarge w3-margin-right"></i> Telefono: 314 331 4450 </p>

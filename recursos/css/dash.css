@@ -1,0 +1,232 @@
+/* Estilos globales */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Estilos para la barra de navegación */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(240, 240, 240, 0.4);
+  border-bottom: 1px solid #ccc;
+  padding: 0 20px;
+}
+
+header form {
+  position: relative;
+}
+
+header input[type="search"] {
+  width: 100%;
+  height: 40px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  padding: 0 40px 0 20px;
+  font-size: 16px;
+}
+
+header input[type="search"]:focus {
+  outline: none;
+}
+
+header input[type="search"]::placeholder {
+  color: #999;
+}
+
+header button {
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+/* Estilos para la lista de empleados */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+th {
+  text-align: left;
+  font-weight: bold;
+}
+
+tr:hover {
+  background-color: rgba(200, 200, 200, 0.5);
+}
+
+tr:last-child {
+  border-bottom: none;
+}
+
+/* Estilos para los botones de acción */
+button.inline-flex {
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 5px;
+  background-color: #fff;
+  transition: background-color 0.3s;
+}
+
+button.inline-flex:hover {
+  background-color: #ccc;
+}
+
+/* Estilos para el contenedor principal */
+.grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+}
+
+/* Estilos para el contenedor secundario */
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Estilos para los enlaces de la barra lateral */
+nav a {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 10px;
+  border-radius: 5px;
+  color: #666;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+nav a:hover {
+  background-color: rgba(200, 200, 200, 0.5);
+  color: #000;
+}
+
+/* Estilos para el botón de actualización */
+button#radix-:r2f: {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}
+
+/* Estilos para los contenedores de tarjetas */
+.card {
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para los elementos de las tarjetas */
+.card p {
+  color: #777;
+}
+
+/* Estilos para la información del usuario */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Establece la altura del contenedor al 100% del viewport */
+}
+
+.info-box {
+  text-align: center;
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.user-icon {
+  width: 100px; /* Ancho del icono del usuario/empresa */
+  height: 100px; /* Altura del icono del usuario/empresa */
+}
+
+/* Estilos para el menú lateral */
+.grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Estilos para el menú lateral en dispositivos grandes */
+.hidden {
+  display: none;
+}
+
+.lg\:block {
+  display: block;
+}
+
+/* Estilos para el contenido principal */
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Estilos para el encabezado */
+header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.4);
+  padding: 0 24px;
+}
+
+/* Estilos para el formulario de búsqueda en el encabezado */
+form {
+  position: relative;
+}
+
+/* Estilos para el avatar en el encabezado */
+button[aria-haspopup="menu"] {
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+}
+
+/* Estilos para el contenido principal */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+/* Estilos para la tabla */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #ccc;
+}
+
+th {
+  font-weight: bold;
+}
+
+/* Estilos para las celdas de acción en la tabla */
+td > button {
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}

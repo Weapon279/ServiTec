@@ -1,0 +1,8 @@
+.cts{
+    display: flex; 
+    flex-direction: row;
+  }
+  
+  .cts > div{
+    margin: auto;
+  }

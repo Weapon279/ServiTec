@@ -55,4 +55,5 @@ $route['translate_uri_dashes'] = true;
 
 // Ruta Nueva
 $route['servicios'] = 'servicios';
+$route['login'] = 'login';
 

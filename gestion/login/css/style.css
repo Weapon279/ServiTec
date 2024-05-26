@@ -1,0 +1,166 @@
+/* Estilos personalizados para el dashboard */
+body {
+    font-size: .875rem;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    box-shadow: inset -1px 0 0 #00aa8a;;
+}
+
+.sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: calc(100vh - 48px);
+    padding-top: .5rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.sidebar .nav-link {
+    font-weight: 500;
+    color: #00aa8a;
+}
+
+.sidebar .nav-link:hover {
+    color: #007bff;
+}
+
+.sidebar .nav-link.active {
+    color: #007bff;
+}
+
+.sidebar .nav-item + .nav-item {
+    margin-top: 1rem;
+}
+
+body {
+    padding-top: 56px;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.25rem;
+}
+
+.table thead th {
+    background-color: #00aa8a;
+    color: #fff;
+}
+
+.badge {
+    font-size: 0.9rem;
+}
+
+body {
+    padding-top: 56px;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.25rem;
+}
+
+.table thead th {
+    background-color: #00aa8a;
+    color: #fff;
+}
+
+.badge {
+    font-size: 0.9rem;
+}
+
+.card {
+    margin-bottom: 20px;
+}
+
+#proximosCursos li, #cursosRelevantes li {
+    margin-bottom: 10px;
+}
+
+#cursosRelevantes h6 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+#cursosRelevantes p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #000000;
+}
+
+body {
+    padding-top: 56px;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.25rem;
+}
+
+.table thead th {
+    background-color: #00aa8a;
+    color: #fff;
+}
+
+.badge {
+    font-size: 0.9rem;
+}
+
+.card {
+    margin-bottom: 20px;
+}
+
+#proximosCursos li, #cursosRelevantes li {
+    margin-bottom: 10px;
+}
+
+#cursosRelevantes h6 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+#cursosRelevantes p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #000000;
+}
+
+body, html {
+    height: 100%;
+    margin: 0;
+}
+
+.d-flex {
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.navbar-nav .nav-item .nav-link {
+    padding: 10px 20px;
+}
+
+.content {
+    overflow-y: auto;
+    height: 100vh;
+    padding: 20px;
+    background-color: #f8f9fa;
+}
+
+.w3-green-custom {
+    background-color: var(--color-verde-azulado) !important;
+}

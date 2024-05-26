@@ -11,6 +11,10 @@ class Principal extends CI_Controller {
 	{
 		$this->load->view('servicios');
 	}
+	public function login()
+	{
+		$this->load->view('login');
+	}
 
 
 

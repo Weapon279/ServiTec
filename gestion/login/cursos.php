@@ -1,5 +1,5 @@
 <?php include 'conexion.php'; ?>
-<?php include 'index.php'; ?>
+<?php include 'dash.php'; ?>
 
 <div class="container mt-5">
     <h2>Gestión de Cursos</h2>
@@ -14,7 +14,7 @@
                 <th>Fecha de Finalización</th>
                 <th>Cupo Máximo</th>
                 <th>Costo</th>
-                <th>Actividad</th>
+                <th>Activar</th>
                 <th>Estatus</th>
             </tr>
         </thead>
@@ -41,7 +41,7 @@
                         <td>{$row['FechaF']}</td>
                         <td>{$row['Capacidad']}</td>
                         <td>{$row['Costo']}</td>
-                        <td><button class='btn btn-info' data-bs-toggle='modal' data-bs-target='#actividadModal{$row['id_Curso']}'>Actividad</button></td>
+                        <td><button class='btn btn-info' data-bs-toggle='modal' data-bs-target='#actividadModal{$row['id_Curso']}'>Lanzar</button></td>
                         <td><span class='badge bg-{$status}'>{$status}</span></td>
                     </tr>";
             }

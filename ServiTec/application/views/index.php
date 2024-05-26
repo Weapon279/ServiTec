@@ -533,23 +533,26 @@ span.psw {
 <!-- Contacto -->
 <div class="w3-container w3-light-grey" style="padding:128px 16px" id="contact">
   <h3 class="w3-center">CONTACTO</h3>
-  <p class="w3-center w3-large">Mantengámonos en contacto. Mandanos un mensaje:</p>
+  <p class="w3-center w3-large">Mantengámonos en contacto. Mándanos un mensaje:</p>
   <div style="margin-top:48px">
     <p><i class="fa fa-map-marker fa-fw w3-xxlarge w3-margin-right"></i> Camino hacia las humedades S/N, Salagua, 28869 Manzanillo, Col.</p>
-    <p><i class="fa fa-phone fa-fw w3-xxlarge w3-margin-right"></i> Telefono: 314 331 4450 </p>
-    <p><i class="fa fa-envelope fa-fw w3-xxlarge w3-margin-right"> </i> Email: utem@utem.com</p>
+    <p><i class="fa fa-phone fa-fw w3-xxlarge w3-margin-right"></i> Teléfono: 314 331 4450 </p>
+    <p><i class="fa fa-envelope fa-fw w3-xxlarge w3-margin-right"></i> Email: utem@utem.com</p>
     <br>
-    <form action="/action_page.php" target="_blank">
-      <p><input class="w3-input w3-border" type="text" placeholder="Name" required name="Nombre"></p>
-      <p><input class="w3-input w3-border" type="text" placeholder="Email" required name="Correo Electronico"></p>
-      <p><input class="w3-input w3-border" type="text" placeholder="Subject" required name="Asunto"></p>
-      <p><input class="w3-input w3-border" type="text" placeholder="Message" required name="Mensaje "></p>
+    <form action="/gestion/mensaje.php" method="POST">
+      <p><input class="w3-input w3-border" type="text" placeholder="Nombre" required name="Nombre"></p>
+      <p><input class="w3-input w3-border" type="email" placeholder="Correo Electrónico" required name="CorreoElectronico"></p>
+      <p><input class="w3-input w3-border" type="text" placeholder="Asunto" required name="Asunto"></p>
+      <p><input class="w3-input w3-border" type="text" placeholder="Mensaje" required name="Mensaje"></p>
       <p>
         <button class="w3-button w3-green-custom" type="submit">
           <i class="fa fa-paper-plane"></i> ENVIAR MENSAJE
         </button>
       </p>
     </form>
+  </div>
+</div>
+
     <!-- fin Contacto -->
 
     

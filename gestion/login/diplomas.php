@@ -1,5 +1,5 @@
 <?php include 'conexion.php'; ?>
-<?php include 'index.php'; ?>
+<?php include 'dash.php'; ?>
 
 <div class="container mt-5">
     <h2>Gestión de Diplomas</h2>

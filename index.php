@@ -1,34 +1,5 @@
-<?php
-
-include 'dashboard/conexion.php';
-
-session_start();
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = $_POST['uname'];
-    $password = $_POST['psw'];
-
-    $sql = "SELECT * FROM users WHERE vCorreo = '$email' AND nPass = '$password'";
-    $result = $conn->query($sql);
-
-    if ($result->num_rows == 1) {
-        $row = $result->fetch_assoc();
-
-        $_SESSION['id_User'] = $row['id_User'];
-        $_SESSION['vNombre'] = $row['vNombre'];
-        $_SESSION['Fk_TypeUser'] = $row['Fk_TypeUser'];
-
-        if ($row['Fk_TypeUser'] == 4) {
-            header("Location: login/dashA.php");
-        } elseif ($row['Fk_TypeUser'] == 1) {
-            header("Location: login/dashA.php");
-        } else {
-        }
-    } else {
-        echo "Usuario o contraseña incorrectos";
-    }
-}
-?>
+<?php include 'dashboard/conexion.php';?>
+<?php include 'contacto.php';?>
 
 
 <!DOCTYPE html>
@@ -263,15 +234,15 @@ span.psw {
 <!-- Navbar (sit on top) -->
 <div class="w3-top">
   <div class="w3-bar w3-green-custom w3-card" id="myNavbar">
-    <a href="#home" class="w3-bar-item w3-button w3-wide">LOGO</a>
+    <a href="index.php" class="w3-bar-item w3-button w3-wide">LOGO</a>
     <!-- Right-sided navbar links -->
     <div class="w3-right w3-hide-small">
-      <a href="#about" class="w3-bar-item w3-button">ACERCA DE</a>
-      <a href="#work" class="w3-bar-item w3-button"><i class="fa fa-th"></i> SERVICIOS</a>
-      <button onclick="document.getElementById('id01').style.display='block'" class="w3-bar-item w3-button" class="fa fa-user"><i class="fa fa-user"></i> LOGIN</button>
+      <a href="#acercade" class="w3-bar-item w3-button">ACERCA DE</a>
+      <a href="#servicios" class="w3-bar-item w3-button"><i class="fa fa-th"></i> SERVICIOS</a>
+      <a href="login.php" class="w3-bar-item w3-button" class="fa fa-user"><i class="fa fa-user"></i> LOGIN</a>
 
 
-      <a href="#contact" class="w3-bar-item w3-button"><i class="fa fa-envelope"></i> CONTACTO</a>
+      <a href="#contacto" class="w3-bar-item w3-button"><i class="fa fa-envelope"></i> CONTACTO</a>
     </div>
 
     <!-- Hide right-floated links on small screens and replace them with a menu icon -->
@@ -282,15 +253,6 @@ span.psw {
   </div>
 </div>
 
-<!-- Sidebar on small screens when clicking the menu icon -->
-<nav class="w3-sidebar w3-bar-block w3-black w3-card w3-animate-left w3-hide-medium w3-hide-large" style="display:none" id="mySidebar">
-  <a href="javascript:void(0)" onclick="w3_close()" class="w3-bar-item w3-button w3-large w3-padding-16">Close ×</a>
-  <a href="#about" onclick="w3_close()" class="w3-bar-item w3-button">ACERCA DE</a>
-  <a href="#team" onclick="w3_close()" class="w3-bar-item w3-button">TEAM</a>
-  <a href="#work" onclick="w3_close()" class="w3-bar-item w3-button">WORK</a>
-  <a href="#pricing" onclick="w3_close()" class="w3-bar-item w3-button">PRICING</a>
-  <a href="#contact" onclick="w3_close()" class="w3-bar-item w3-button">CONTACT</a>
-</nav>
 
 <!-- Header with full-height image -->
 <!-- Carousel -->
@@ -325,7 +287,7 @@ span.psw {
 </div>
 
 <!-- Cursos, talleres y servicios -->
-<div class="w3-container" style="padding:128px 16px" id="about">
+<div class="w3-container" style="padding:128px 16px" id="acercade">
   <h3 class="w3-center">CURSOS, TALLERES Y SERVICIOS TECNOLOGICOS</h3>
   <p class="w3-center w3-large">Todo en un solo lugar #SoyUtem</p>
   <div class="w3-row-padding w3-center" style="margin-top:64px">
@@ -359,7 +321,7 @@ span.psw {
     <div class="w3-col m6">
       <h3>Reconocimientos.</h3>
       <p>Felicidades al Ingeniero Giovanni por su accenso<br>tempor incididunt ut labore et dolore.</p>
-      <p><a href="#work" class="w3-button w3-green-custom"><i class="fa fa-th"> </i> Ver Servicios</a></p>
+      <p><a href="#servicios" class="w3-button w3-green-custom"><i class="fa fa-th"> </i> Ver Servicios</a></p>
     </div>
     <div class="w3-col m6">
       <img class="w3-image w3-round-large" src="recursos/img/acceso.webp" alt="Buildings" width="250" height="250">
@@ -374,8 +336,9 @@ span.psw {
   <h3 class="w3-center">Proximos Cursos</h3>
   <p class="w3-center w3-large">¡INSCRÍBETE AHORA!</p>
     <div class="w3-col l3 m6 w3-margin-bottom">
+    <img src="recursos/img/acceso.webp" alt="Ingeniero Juan Manuel Fernandez Alvarez" style="width:100%">
+
       <div class="w3-card">
-        <img src="recursos/img/acceso.webp" alt="Ingeniero Juan Manuel Fernandez Alvarez" style="width:100%">
         <div class="w3-container">
           <h3>Metodologia Scrum</h3>
           <p class="w3-opacity">Ingeniero Juan Manuel Fernandez Alvarez </p>
@@ -462,7 +425,7 @@ span.psw {
 
 
 <!-- Servicios -->
-<div class="w3-container" style="padding:128px 16px" id="work">
+<div class="w3-container" style="padding:128px 16px" id="servicios">
   <h3 class="w3-center">SERVICIOS</h3>
   <p class="w3-center w3-large">Cursos de calidad para gente de calidad</p>
 
@@ -562,26 +525,30 @@ span.psw {
 
 
 <!-- Contacto -->
-<div class="w3-container w3-light-grey" style="padding:128px 16px" id="contact">
-  <h3 class="w3-center">CONTACTO</h3>
-  <p class="w3-center w3-large">Mantengámonos en contacto. Mandanos un mensaje:</p>
-  <div style="margin-top:48px">
-    <p><i class="fa fa-map-marker fa-fw w3-xxlarge w3-margin-right"></i> Camino hacia las humedades S/N, Salagua, 28869 Manzanillo, Col.</p>
-    <p><i class="fa fa-phone fa-fw w3-xxlarge w3-margin-right"></i> Telefono: 314 331 4450 </p>
-    <p><i class="fa fa-envelope fa-fw w3-xxlarge w3-margin-right"> </i> Email: utem@utem.com</p>
-    <br>
-    <form action="/action_page.php" target="_blank">
-      <p><input class="w3-input w3-border" type="text" placeholder="Name" required name="Nombre"></p>
-      <p><input class="w3-input w3-border" type="text" placeholder="Email" required name="Correo Electronico"></p>
-      <p><input class="w3-input w3-border" type="text" placeholder="Subject" required name="Asunto"></p>
-      <p><input class="w3-input w3-border" type="text" placeholder="Message" required name="Mensaje "></p>
-      <p>
-        <button class="w3-button w3-green-custom" type="submit">
-          <i class="fa fa-paper-plane"></i> ENVIAR MENSAJE
-        </button>
-      </p>
-    </form>
-    <!-- fin Contacto -->
+<div class="w3-container w3-light-grey" style="padding:128px 16px" id="contacto">
+    <h3 class="w3-center">CONTACTO</h3>
+    <p class="w3-center w3-large">Mantengámonos en contacto. Mandanos un mensaje:</p>
+    <div style="margin-top:48px">
+        <p><i class="fa fa-map-marker fa-fw w3-xxlarge w3-margin-right"></i> Camino hacia las humedades S/N, Salagua, 28869 Manzanillo, Col.</p>
+        <p><i class="fa fa-phone fa-fw w3-xxlarge w3-margin-right"></i> Telefono: 314 331 4450 </p>
+        <p><i class="fa fa-envelope fa-fw w3-xxlarge w3-margin-right"> </i> Email: utem@utem.com</p>
+        <br>
+        <form action="contacto.php" method="POST">
+            <p><input class="w3-input w3-border" type="text" placeholder="Nombre" required name="Nombre"></p>
+            <p><input class="w3-input w3-border" type="email" placeholder="Correo Electrónico" required name="CorreoElectronico"></p>
+            <p><input class="w3-input w3-border" type="text" placeholder="Asunto" required name="Asunto"></p>
+            <p><textarea class="w3-input w3-border" placeholder="Mensaje" required name="Mensaje"></textarea></p>
+            <p>
+                <button class="w3-button w3-green-custom" type="submit">
+                    <i class="fa fa-paper-plane"></i> ENVIAR MENSAJE
+                </button>
+            </p>
+        </form>
+    </div>
+</div>
+
+
+    <!-- fin Contacto --> 
 
     
     <!-- googlemaps -->
@@ -600,50 +567,6 @@ span.psw {
 </footer>
    </div>
 
-   <!--Login -->
-
-<div id="id01" class="modal">
-  
-  <form class="modal-content animate" action="dashboard/a/dashA.php" method="post">
-    <div class="imgcontainer">
-      <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
-
-    </div>
-
-    <div class="container">
-      <label for="uname"><b>Usuario</b></label>
-      <input type="text" placeholder="Nombre de usuario" name="uname" required>
-
-      <label for="psw"><b>Contraseña</b></label>
-      <input type="password" placeholder="Escribe tu contraseña" name="psw" required>
-        
-      <button type="submit">Inicio de sesión</button>
-      <label>
-        <input type="checkbox" checked="checked" name="remember"> Acuérdate de mí
-      </label>
-    </div>
-
-    <div class="container" style="background-color:#f1f1f1">
-      <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancelar</button>
-      <span class="psw">¿Tienes cuenta? <a href="login/registro.php">Registrate</a></span>
-
-    </div>
-  </form>
-</div>
-
-<script>
-// Get the modal
-var modal = document.getElementById('id01');
-
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function(event) {
-    if (event.target == modal) {
-        modal.style.display = "none";
-    }
-}
-</script>
-
-   <!-- Fin login-->
 
 <script>
 // Modal Image Gallery

@@ -1,7 +1,7 @@
 <?php
 $servername = "localhost";
-$username = "root";
-$password = "Mrweapon21$";
+$username = "Admin";
+$password = "";
 $dbname = "cursos";
 
 // Crear conexión

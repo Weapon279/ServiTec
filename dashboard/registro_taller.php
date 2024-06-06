@@ -1,5 +1,5 @@
 <?php include 'conexion.php'; ?>
-<?php include 'index.php'; ?>
+<?php include 'indexa.php'; ?>
 
 
 <!DOCTYPE html>

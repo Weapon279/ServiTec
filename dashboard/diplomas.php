@@ -1,5 +1,5 @@
 <?php include 'conexion.php'; ?>
-<?php include 'index.php'; ?>
+<?php include 'indexa.php'; ?>
 
 <div class="w3-main" style="margin-left:300px;margin-top:43px;">
 

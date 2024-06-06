@@ -1,11 +1,11 @@
 <?php include 'conexion.php'; ?>
-<?php include 'index.php'; ?>
+<?php include 'indexa.php'; ?>
 
 
 <!DOCTYPE html>
 <html>
 <head>
-<title>DashBoard</title>
+<title>Admin</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">

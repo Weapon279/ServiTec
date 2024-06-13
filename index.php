@@ -1,5 +1,74 @@
-<?php include 'dashboard/conexion.php';?>
+<?php
+session_start();
+require 'modelo/conexion.php';
+
+try {
+    $sql = "SELECT 
+                c.id_Curso,
+                c.NombreCurso,
+                c.Perfil,
+                c.DescripcionCurso,
+                c.FechaHoraC,
+                c.FechaHoraA,
+                c.NombreDoc,
+                c.Modalidad,
+                c.CostoCurso,
+                c.ImagenCurso,
+                o.NombreOfer
+            FROM 
+                curso c
+            JOIN 
+                oferta o ON c.Fk_id_ofer = o.id_ofer
+            WHERE 
+                c.Status = 'Disponible'
+            ORDER BY c.FechaHoraC ASC
+            LIMIT 4";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    $cursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
+}
+?>
+
+<?php
+
+try {
+
+
+  // Obtener conteo de cursos
+  $sqlCursos = "SELECT COUNT(*) AS totalCursos FROM curso WHERE TipoSer = 'Curso' AND Status = 'Disponible'";
+  $stmtCursos = $pdo->prepare($sqlCursos);
+  $stmtCursos->execute();
+  $totalCursos = $stmtCursos->fetch(PDO::FETCH_ASSOC)['totalCursos'];
+
+  // Obtener conteo de talleres
+  $sqlTalleres = "SELECT COUNT(*) AS totalTalleres FROM curso WHERE TipoSer = 'Taller' AND Status = 'Disponible'";
+  $stmtTalleres = $pdo->prepare($sqlTalleres);
+  $stmtTalleres->execute();
+  $totalTalleres = $stmtTalleres->fetch(PDO::FETCH_ASSOC)['totalTalleres'];
+
+  // Obtener conteo de servicios tecnológicos
+  $sqlServicios = "SELECT COUNT(*) AS totalServicios FROM curso WHERE TipoSer = 'Servicio Tecnologico' AND Status = 'Disponible'";
+  $stmtServicios = $pdo->prepare($sqlServicios);
+  $stmtServicios->execute();
+  $totalServicios = $stmtServicios->fetch(PDO::FETCH_ASSOC)['totalServicios'];
+
+  // Obtener conteo de clientes satisfechos
+  $sqlClientes = "SELECT COUNT(DISTINCT Fk_id_user) AS totalClientes FROM diplomas";
+  $stmtClientes = $pdo->prepare($sqlClientes);
+  $stmtClientes->execute();
+  $totalClientes = $stmtClientes->fetch(PDO::FETCH_ASSOC)['totalClientes'];
+
+} catch (PDOException $e) {
+  echo "Error: " . $e->getMessage();
+}
+?>
+
+<?php include 'modelo/conexion.php';?>
 <?php include 'contacto.php';?>
+
 
 
 <!DOCTYPE html>
@@ -229,12 +298,16 @@ span.psw {
 </style>
 <!-- Fin login -->
 </head>
+<!-- Margen de tabla y menu lateral -->
+<div class="w3-main" style="margin-left:px;margin-top:60px;">
+<!--Fin de margen -->
+
 <body>
 
 <!-- Navbar (sit on top) -->
 <div class="w3-top">
   <div class="w3-bar w3-green-custom w3-card" id="myNavbar">
-    <a href="index.php" class="w3-bar-item w3-button w3-wide">LOGO</a>
+    <a href="index.php" class="w3-bar-item w3-button w3-wide">IGESEC</a>
     <!-- Right-sided navbar links -->
     <div class="w3-right w3-hide-small">
       <a href="#acercade" class="w3-bar-item w3-button">ACERCA DE</a>
@@ -271,19 +344,13 @@ span.psw {
     <img src="recursos/img/utem.webp" alt="utem" class="d-block" style="width:100%">
   </div>
   <div class="carousel-item">
-    <img src="Recursos/img/scrum.webp" alt="Scrum" class="d-block" style="width:110%">
+    <img src="Recursos/img/scrum.webp" alt="Scrum" class="d-block" style="width:100%">
   </div>
   <div class="carousel-item">
     <img src="Recursos/img/scrum.webp" alt="Scrum" class="d-block" style="width:100%">
   </div>
 </div>
 <!-- Left and right controls/icons -->
-<button class="carousel-control-prev" type="button" data-bs-target="#banner" data-bs-slide="prev">
-  <span class="carousel-control-prev-icon"></span>
-</button>
-<button class="carousel-control-next" type="button" data-bs-target="#banner" data-bs-slide="next">
-  <span class="carousel-control-next-icon"></span>
-</button>
 </div>
 
 <!-- Cursos, talleres y servicios -->
@@ -332,92 +399,53 @@ span.psw {
 
 
 <!-- Cursos proxims -->
+
+<!-- Cursos próximos -->
 <div class="w3-container" style="padding:128px 16px" id="">
-  <h3 class="w3-center">Proximos Cursos</h3>
+  <h3 class="w3-center">Próximos Cursos</h3>
   <p class="w3-center w3-large">¡INSCRÍBETE AHORA!</p>
-    <div class="w3-col l3 m6 w3-margin-bottom">
-    <img src="recursos/img/acceso.webp" alt="Ingeniero Juan Manuel Fernandez Alvarez" style="width:100%">
 
-      <div class="w3-card">
-        <div class="w3-container">
-          <h3>Metodologia Scrum</h3>
-          <p class="w3-opacity">Ingeniero Juan Manuel Fernandez Alvarez </p>
-          <p>En este curso aprenderan scrum.</p>
-          <p>Fecha Inicio 24/04/25</p>
-         <p>Termino 24/04/26</p>
-         <p>Modalidad: Presencial</p>
-        <p>Costo: $999</p>
-          <p><button class="w3-button w3-green-custom w3-block"><i class="fa fa-user"></i> ¡Registrarme ahora!</button></p>
+  <?php if (!empty($cursos)) { ?>
+    <?php foreach ($cursos as $curso) { ?>
+      <div class="w3-col l3 m6 w3-margin-bottom">
+      <img src="<?php echo htmlspecialchars($curso['ImagenCurso'] ?? 'default.jpg'); ?>" alt="<?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?>" style="width:100%">        <div class="w3-card">
+          <div class="w3-container">
+            <h3><?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?></h3>
+            <p class="w3-opacity"><?php echo htmlspecialchars($curso['NombreOfer'] ?? ''); ?></p>
+            <p><?php echo htmlspecialchars($curso['DescripcionCurso'] ?? ''); ?></p>
+            <p>Docente: <?php echo htmlspecialchars($curso['NombreDoc'] ?? ''); ?></p>
+            <p>Fecha Inicio: <?php echo htmlspecialchars($curso['FechaHoraC'] ?? ''); ?></p>
+            <p>Termino: <?php echo htmlspecialchars($curso['FechaHoraA'] ?? ''); ?></p>
+            <p>Modalidad: <?php echo htmlspecialchars($curso['Modalidad'] ?? ''); ?></p>
+            <p>Costo: $<?php echo htmlspecialchars($curso['CostoCurso'] ?? ''); ?></p>
+            <p><a href="login.php" class="w3-button w3-green-custom w3-block"><i class="fa fa-user"> </i> ¡Registrarme ahora!</a></p>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="w3-col l3 m6 w3-margin-bottom">
-      <div class="w3-card">
-        <img src="recursos/img/acceso.webp" alt="Ingeniero Juan Manuel Fernandez Alvarez" style="width:100%">
-        <div class="w3-container">
-          <h3>Metodologia Scrum</h3>
-          <p class="w3-opacity">Ingeniero Juan Manuel Fernandez Alvarez </p>
-          <p>En este curso aprenderan scrum.</p>
-          <p>Fecha Inicio 24/04/25</p>
-         <p>Termino 24/04/26</p>
-         <p>Modalidad: Presencial</p>
-        <p>Costo: $999</p>
-          <p><button class="w3-button w3-green-custom w3-block"><i class="fa fa-user"></i> ¡Registrarme ahora!</button></p>
-        </div>
-      </div>
-    </div>
-    <div class="w3-col l3 m6 w3-margin-bottom">
-      <div class="w3-card">
-        <img src="recursos/img/acceso.webp" alt="Ingeniero Juan Manuel Fernandez Alvarez" style="width:100%">
-        <div class="w3-container">
-          <h3>Metodologia Scrum</h3>
-          <p class="w3-opacity">Ingeniero Juan Manuel Fernandez Alvarez </p>
-          <p>En este curso aprenderan scrum.</p>
-          <p>Fecha Inicio 24/04/25</p>
-         <p>Termino 24/04/26</p>
-         <p>Modalidad: Presencial</p>
-        <p>Costo: $999</p>
-          <p><button class="w3-button w3-green-custom w3-block"><i class="fa fa-user"></i> ¡Registrarme ahora!</button></p>
-        </div>
-      </div>
-    </div>
-    <div class="w3-col l3 m6 w3-margin-bottom">
-      <div class="w3-card">
-        <img src="recursos/img/acceso.webp" alt="Ingeniero Juan Manuel Fernandez Alvarez" style="width:100%">
-        <div class="w3-container">
-          <h3>Metodologia Scrum</h3>
-          <p class="w3-opacity">Experiencia Optima </p>
-          <p>En este curso aprenderan scrum.</p>
-          <p>Fecha Inicio 24/04/25</p>
-         <p>Termino 24/04/26</p>
-         <p>Modalidad: Presencial</p>
-        <p>Costo: $999</p>
-          <p><button class="w3-button w3-green-custom w3-block"><i class="fa fa-user"></i> ¡Registrarme ahora!</button></p>
-        </div>
-      </div>
-    </div>
-  </div>
+    <?php } ?>
+  <?php } else { ?>
+    <p class="w3-center">No hay cursos disponibles en este momento.</p>
+  <?php } ?>
 </div>
-
-<!-- Fin Cursos proxims -->
+<!-- Fin Cursos próximos -->
 
 
 <!-- lista de cursos -->
 <div class="w3-container w3-row w3-center w3-green-custom w3-padding-64">
   <div class="w3-quarter">
-    <span class="w3-xxlarge">14+</span>
+    <span class="w3-xxlarge"><?php echo $totalCursos; ?>+</span>
     <br>Cursos
   </div>
   <div class="w3-quarter">
-    <span class="w3-xxlarge">55+</span>
+    <span class="w3-xxlarge"><?php echo $totalTalleres; ?>+</span>
     <br>Talleres
   </div>
   <div class="w3-quarter">
-    <span class="w3-xxlarge">89+</span>
+    <span class="w3-xxlarge"><?php echo $totalServicios; ?>+</span>
     <br>Servicios Tecnologicos
   </div>
   <div class="w3-quarter">
-    <span class="w3-xxlarge">150+</span>
+    <span class="w3-xxlarge"><?php echo $totalClientes; ?>+</span>
     <br>Clientes Satisfechos
   </div>
 </div>
@@ -425,32 +453,34 @@ span.psw {
 
 
 <!-- Servicios -->
+<!-- Servicios -->
 <div class="w3-container" style="padding:128px 16px" id="servicios">
   <h3 class="w3-center">SERVICIOS</h3>
   <p class="w3-center w3-large">Cursos de calidad para gente de calidad</p>
 
   <div class="w3-row-padding" style="margin-top:64px">
+    <?php
+      if (!empty($cursos)) {
+        foreach ($cursos as $curso) {
+          if ($curso['FechaHoraC'] === null && $curso['FechaHoraA'] === null) {
+    ?>
     <div class="w3-col l3 m6">
-      <img src="recursos/img/acceso.webp" style="width:100%" onclick="onClick(this)" class="w3-hover-opacity" alt="Desarrollo de habilidad de CEO con este curso impartido por quien tu quieras.">
-      <p class="w3-center w3-large">Desarrolla tu habilidad de Ceo</p>
+      <img src="<?php echo htmlspecialchars($curso['ImagenCurso'] ?? 'default.jpg'); ?>" style="width:100%" onclick="onClick(this)" class="w3-hover-opacity" alt="<?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?><?php echo htmlspecialchars($curso['DescripcionCurso'] ?? ''); ?>">
+      <p class="w3-center w3-large"><?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?></p>
+      
     </div>
-    <div class="w3-col l3 m6">
-      <img src="recursos/img/acceso.webp" style="width:100%" onclick="onClick(this)" class="w3-hover-opacity" alt="con este curso impartido por quien tu quieras.">
-        <p class="w3-center w3-large">Tu contabilidad con facilidad</p>
-    </div>
-    <div class="w3-col l3 m6">
-      <img src="recursos/img/acceso.webp" style="width:100%" onclick="onClick(this)" class="w3-hover-opacity" alt="con este curso impartido por quien tu quieras.">
-        <p class="w3-center w3-large">Matematicas Computacional</p>
-    </div>
-    <div class="w3-col l3 m6">
-      <img src="recursos/img/acceso.webp" style="width:100%" onclick="onClick(this)" class="w3-hover-opacity" alt="con este curso impartido por quien tu quieras.">
-        <p class="w3-center w3-large">Aprende habilidad basicas</p>
-    </div>
+    <?php
+          }
+        }
+      } else {
+    ?>
+    <p class="w3-center">No hay cursos disponibles en este momento.</p>
+    <?php
+      }
+    ?>
   </div>
-  <!-- Fin Servicios -->
-
-
-  
+</div>
+<!-- Fin Servicios -->  <!-- Fin Servicios -->
   </div>
 </div>
 
@@ -477,8 +507,6 @@ span.psw {
         <li class="w3-padding-16"><b>10</b> Aire Condicionado</li>
         <li class="w3-padding-16"><b>10</b> Constancias</li>
         <li class="w3-padding-16">
-          <h2 class="w3-wide">$ 1500</h2>
-          <span class="w3-opacity">Por Persona</span>
         </li>
         <li class="w3-light-grey w3-padding-24">
           <button class="w3-button w3-green-custom w3-padding-large">Contactar</button>
@@ -494,8 +522,6 @@ span.psw {
         <li class="w3-padding-16"><b>Soporte </b> En todo momento </li>
 
         <li class="w3-padding-16">
-          <h2 class="w3-wide">$ 1000</h2>
-          <span class="w3-opacity">Por persona</span>
         </li>
         <li class="w3-light-grey w3-padding-24">
           <button class="w3-button w3-green-custom w3-padding-large">Contactar</button>
@@ -510,8 +536,6 @@ span.psw {
         <li class="w3-padding-16"><b>10</b> Constancias</li>
         <li class="w3-padding-16"><b>Soporte </b> En todo momento </li>
         <li class="w3-padding-16">
-          <h2 class="w3-wide">Contactar</h2>
-          <span class="w3-opacity">Por persona</span>
         </li>
         <li class="w3-light-grey w3-padding-24">
           <button class="w3-button w3-green-custom w3-padding-large">Contactar</button>
@@ -546,15 +570,8 @@ span.psw {
         </form>
     </div>
 </div>
-
-
     <!-- fin Contacto --> 
 
-    
-    <!-- googlemaps -->
-    <center>
-<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3769.267748586861!2d-104.31920052499501!3d19.13975364996839!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8424d64c16a690bd%3A0x14d49ae4c320b692!2sUniversidad%20Tecnol%C3%B3gica%20de%20Manzanillo!5e0!3m2!1ses!2smx!4v1716512186157!5m2!1ses!2smx" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-  </center>
 <!-- Footer -->
 <footer class="w3-center w3-green-custom w3-padding-10">
   <div class="w3-xlarge w3-section">

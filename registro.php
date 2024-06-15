@@ -1,8 +1,6 @@
 <?php
 require 'modelo/conexion.php';
 
-
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $vCorreo = $_POST['vCorreo'];
     $nPass = password_hash($_POST['nPass'], PASSWORD_DEFAULT); 
@@ -11,22 +9,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $vApellidoM = $_POST['vApellidoM'];
     $nWhats = $_POST['nWhats'];
     $Fk_TypeUser = 4;
-    $bStatus = 1;
+    $bStatus = 'Activo'; 
 
-    $stmt = $pdo->prepare("INSERT INTO user (vCorreo, nPass, vNombre, vApellidoP, vApellidoM, nWhats, Fk_TypeUser, bStatus) VALUES (:vCorreo, :nPass, :vNombre, :vApellidoP, :vApellidoM, :nWhats, :Fk_TypeUser, :bStatus)");
-    $stmt->bindParam(':vCorreo', $vCorreo);
-    $stmt->bindParam(':nPass', $nPass);
-    $stmt->bindParam(':vNombre', $vNombre);
-    $stmt->bindParam(':vApellidoP', $vApellidoP);
-    $stmt->bindParam(':vApellidoM', $vApellidoM);
-    $stmt->bindParam(':nWhats', $nWhats);
-    $stmt->bindParam(':Fk_TypeUser', $Fk_TypeUser);
-    $stmt->bindParam(':bStatus', $bStatus);
+    if (!is_numeric($nWhats) || $nWhats < 0 || $nWhats > 9223372036854775807) {
+        echo "Número de WhatsApp no válido.";
+        exit();
+    }
 
-    if ($stmt->execute()) {
-        echo "Usuario registrado exitosamente.";
-    } else {
-        echo "Error al registrar el usuario.";
+    try {
+        $stmt = $pdo->prepare("INSERT INTO user (vCorreo, nPass, vNombre, vApellidoP, vApellidoM, nWhats, Fk_TypeUser, bStatus, iFechaHoraC, iFechaHoraA) VALUES (:vCorreo, :nPass, :vNombre, :vApellidoP, :vApellidoM, :nWhats, :Fk_TypeUser, :bStatus, NOW(), NOW())");
+        
+        $stmt->bindParam(':vCorreo', $vCorreo);
+        $stmt->bindParam(':nPass', $nPass);
+        $stmt->bindParam(':vNombre', $vNombre);
+        $stmt->bindParam(':vApellidoP', $vApellidoP);
+        $stmt->bindParam(':vApellidoM', $vApellidoM);
+        $stmt->bindParam(':nWhats', $nWhats, PDO::PARAM_INT); 
+        $stmt->bindParam(':Fk_TypeUser', $Fk_TypeUser, PDO::PARAM_INT);
+        $stmt->bindParam(':bStatus', $bStatus);
+
+        if ($stmt->execute()) {
+            echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        document.getElementById('modal').style.display = 'block';
+                        setTimeout(function() {
+                            window.location.href = 'login.php';
+                        }, 5000);
+                    });
+                  </script>";
+        } else {
+            echo "Error al registrar el usuario.";
+        }
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
     }
 }
 ?>
@@ -64,7 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             background-color: white;
         }
 
-        input[type=text], input[type=password] {
+        input[type=text], input[type=password], input[type=number] {
             width: 100%;
             padding: 15px;
             margin: 5px 0 22px 0;
@@ -142,7 +157,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <label for="vCorreo"><b>Correo</b></label>
     <input type="text" placeholder="Escribe tu Correo" name="vCorreo" required>
     <label for="nWhats"><b>WhatsApp</b></label>
-    <input type="text" placeholder="Escribe Tu WhatsApp" name="nWhats" required>
+    <input type="number" placeholder="Escribe Tu WhatsApp" name="nWhats" required>
     <label for="nPass"><b>Contraseña</b></label>
     <input type="password" placeholder="Escribe tu contraseña" name="nPass" required>
     <span class="psw">¿Tienes cuenta? <a href="login.php">Inicia Sesion</a></span>
@@ -156,6 +171,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <p>Usuario registrado con éxito. Inicia sesión</p>
   </div>
 </div>
+
+<script>
+    // Script para cerrar el modal y redirigir después de 5 segundos
+    document.addEventListener('DOMContentLoaded', function() {
+        var modal = document.getElementById('modal');
+        var span = document.getElementsByClassName('close')[0];
+
+        // Cuando el usuario hace clic en <span> (x), cierra el modal
+        span.onclick = function() {
+            modal.style.display = 'none';
+        }
+
+        // Cuando el usuario hace clic fuera del modal, lo cierra
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    });
+</script>
 
 </body>
 </html>

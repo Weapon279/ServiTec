@@ -1,7 +1,53 @@
 
-<?php include 'conexion.php'; ?>
 <?php include 'indexa.php'; ?>
 
+
+<?php
+session_start();
+require 'conexion.php';
+
+// Verificar si el usuario está autenticado
+if (!isset($_SESSION['userId'])) {
+    header("Location: ../login.php");
+    exit();
+}
+
+// Función para obtener el conteo de servicios según su estado
+function contarServicios($conn, $status) {
+    $query = "SELECT COUNT(*) AS total FROM curso WHERE Status = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $status);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    return $row['total'];
+}
+
+// Obtener el número de servicios en curso
+$serviciosEnCurso = contarServicios($conn, 'Disponible');
+
+// Obtener el número de servicios sin fecha
+$serviciosSinFecha = contarServicios($conn, 'Falta Informacion');
+
+// Obtener el número de servicios cancelados
+$serviciosCancelados = contarServicios($conn, 'Cancelado');
+
+// Obtener el número de usuarios (alumnos)
+$queryUsuarios = "SELECT COUNT(*) AS total FROM alumnos";
+$resultUsuarios = $conn->query($queryUsuarios);
+$usuarios = $resultUsuarios->fetch_assoc()['total'];
+
+// Obtener los próximos cursos
+$sqlProximosCursos = "SELECT NombreCurso, FechaI FROM grupo INNER JOIN curso ON grupo.Fk_id_Curso = curso.id_Curso WHERE FechaI > NOW() ORDER BY FechaI ASC";
+$resultProximosCursos = $conn->query($sqlProximosCursos);
+
+// Obtener cursos sin fecha
+$sqlCursosSinFecha = "SELECT NombreCurso, DescripcionCurso, DocenteConvoca, CostoCurso FROM curso LEFT JOIN convocatoria ON curso.Fk_id_ofer = convocatoria.Id_Convoca WHERE curso.FechaHoraC IS NULL";
+$resultCursosSinFecha = $conn->query($sqlCursosSinFecha);
+
+// Cerrar la conexión
+$conn->close();
+?>
 
 <!DOCTYPE html>
 <html>
@@ -14,16 +60,12 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
-
-
-
+<link rel="stylesheet" href="css/style.css">
 <style>
 html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 </style>
 </head>
-
-
+<body>
 
 <!-- Overlay effect when opening sidebar on small screens -->
 <div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
@@ -38,122 +80,115 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 
   <div class="w3-row-padding w3-margin-bottom">
     <div class="w3-quarter">
-      <div class="w3-container w3-green w3-padding-16">
-        <div class="w3-left"><i class="fa fa-comment w3-xxxlarge"></i></div>
-        <div class="w3-right">
-          <h3>52</h3>
+        <div class="w3-container w3-green w3-padding-16">
+            <div class="w3-left"><i class="fa fa-comment w3-xxxlarge"></i></div>
+            <div class="w3-right">
+                <h3><?php echo $serviciosEnCurso; ?></h3>
+            </div>
+            <div class="w3-clear"></div>
+            <h4>Servicios en curso</h4>
         </div>
-        <div class="w3-clear"></div>
-        <h4>Servicios en curso.</h4>
-      </div>
     </div>
     <div class="w3-quarter">
-      <div class="w3-container w3-yellow w3-padding-16">
-        <div class="w3-left"><i class="fa fa-eye w3-xxxlarge"></i></div>
-        <div class="w3-right">
-          <h3>99</h3>
+        <div class="w3-container w3-yellow w3-padding-16">
+            <div class="w3-left"><i class="fa fa-eye w3-xxxlarge"></i></div>
+            <div class="w3-right">
+                <h3><?php echo $serviciosSinFecha; ?></h3>
+            </div>
+            <div class="w3-clear"></div>
+            <h4>Servicios sin fecha</h4>
         </div>
-        <div class="w3-clear"></div>
-        <h4>Servicios sin fecha</h4>
-      </div>
     </div>
     <div class="w3-quarter">
-      <div class="w3-container w3-red w3-padding-16">
-        <div class="w3-left"><i class="fa fa-share-alt w3-xxxlarge"></i></div>
-        <div class="w3-right">
-          <h3>23</h3>
+        <div class="w3-container w3-red w3-padding-16">
+            <div class="w3-left"><i class="fa fa-share-alt w3-xxxlarge"></i></div>
+            <div class="w3-right">
+                <h3><?php echo $serviciosCancelados; ?></h3>
+            </div>
+            <div class="w3-clear"></div>
+            <h4>Servicios Cancelados</h4>
         </div>
-        <div class="w3-clear"></div>
-        <h4>Servicios Cancelados</h4>
-      </div>
     </div>
     <div class="w3-quarter">
-      <div class="w3-container w3-orange w3-text-white w3-padding-16">
-        <div class="w3-left"><i class="fa fa-users w3-xxxlarge"></i></div>
-        <div class="w3-right">
-          <h3>50</h3>
+        <div class="w3-container w3-orange w3-text-white w3-padding-16">
+            <div class="w3-left"><i class="fa fa-users w3-xxxlarge"></i></div>
+            <div class="w3-right">
+                <h3><?php echo $usuarios; ?></h3>
+            </div>
+            <div class="w3-clear"></div>
+            <h4>Usuarios</h4>
         </div>
-        <div class="w3-clear"></div>
-        <h4>Usuarios</h4>
-      </div>
     </div>
   </div>
 
-
   <div class="row">
-        <!-- Gráfica de cursos vendidos -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Cursos Vendidos</h5>
-                    <canvas id="ventasCursosChart"></canvas>
-                </div>
-            </div>
-        </div>
-                <!-- Fin Gráfica de cursos vendidos -->
-
-        <!-- Próximos cursos -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Próximos Cursos</h5>
-                    <ul id="proximosCursos" class="list-group">
-                        <!-- Listar próximos cursos desde la base de datos -->
-                        <?php
-                        $sql = "SELECT NombreCurso, FechaI FROM grupo INNER JOIN curso ON grupo.Fk_id_Curso = curso.id_Curso WHERE FechaI > NOW() ORDER BY FechaI ASC";
-                        $result = $conn->query($sql);
-                        while($row = $result->fetch_assoc()) {
-                            echo "<li class='list-group-item'>" . $row['NombreCurso'] . " - " . $row['FechaI'] . "</li>";
-                        }
-                        ?>
-                    </ul>
-                </div>
-            </div>
-        </div>
-                <!-- Fin Próximos cursos -->
-
-        <!-- Cursos sin fecha -->
-        <div class="col-md-12 mt-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Cursos Sin Fecha</h5>
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Nombre del Curso</th>
-                                <th>Descripción</th>
-                                <th>Docente</th>
-                                <th>Costo</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            $sql = "SELECT NombreCurso, DescripcionCurso, DocenteConvoca, CostoCurso FROM curso LEFT JOIN convocatoria ON curso.Fk_id_ofer = convocatoria.Id_Convoca WHERE curso.FechaHoraC IS NULL";
-                            $result = $conn->query($sql);
-                            while($row = $result->fetch_assoc()) {
-                                echo "<tr>
-                                        <td>" . $row['NombreCurso'] . "</td>
-                                        <td>" . $row['DescripcionCurso'] . "</td>
-                                        <td>" . $row['DocenteConvoca'] . "</td>
-                                        <td>" . $row['CostoCurso'] . "</td>
-                                    </tr>";
-                            }
-                            ?>
-                        </tbody>
-                    </table>
-                </div>
+    <!-- Gráfica de cursos vendidos -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Cursos Vendidos</h5>
+                <canvas id="ventasCursosChart"></canvas>
             </div>
         </div>
     </div>
-</div>
-        <!-- Fin Cursos sin fecha -->
+    <!-- Fin Gráfica de cursos vendidos -->
 
+    <!-- Próximos cursos -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Próximos Cursos</h5>
+                <ul id="proximosCursos" class="list-group">
+                    <!-- Listar próximos cursos desde la base de datos -->
+                    <?php
+                    while($row = $resultProximosCursos->fetch_assoc()) {
+                        echo "<li class='list-group-item'>" . $row['NombreCurso'] . " - " . $row['FechaI'] . "</li>";
+                    }
+                    ?>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- Fin Próximos cursos -->
+
+    <!-- Cursos sin fecha -->
+    <div class="col-md-12 mt-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Cursos Sin Fecha</h5>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nombre del Curso</th>
+                            <th>Descripción</th>
+                            <th>Docente</th>
+                            <th>Costo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        while($row = $resultCursosSinFecha->fetch_assoc()) {
+                            echo "<tr>
+                                    <td>" . $row['NombreCurso'] . "</td>
+                                    <td>" . $row['DescripcionCurso'] . "</td>
+                                    <td>" . $row['DocenteConvoca'] . "</td>
+                                    <td>" . $row['CostoCurso'] . "</td>
+                                </tr>";
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Fin Cursos sin fecha -->
+  </div>
+
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="js/script.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
- 
 
 <script>
 // Get the Sidebar

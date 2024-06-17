@@ -3,6 +3,7 @@ require 'conexion.php';
 require 'indexa.php';
 
 
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         $courseId = $_POST['id_Curso'];
@@ -33,18 +34,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             case 'delete':
                 // Eliminar la fecha del curso y el nombre del docente, y cambiar el estado
-                $sql = "UPDATE curso SET FechaHoraC = NULL, FechaHoraA = NULL, Status = 'Falta Informacion' WHERE id_Curso = $courseId";
+                $sql = "UPDATE curso SET Status = 'Cancelado' , FechaHoraC = NULL, FechaHoraA = NULL,  WHERE id_Curso = $courseId";
                 $conn->query($sql);
                 $sql = "UPDATE convocatoria SET DocenteConvoca = '' WHERE Id_Convoca = (SELECT Fk_id_ofer FROM curso WHERE id_Curso = $courseId)";
                 $conn->query($sql);
                 break;
+                //Fin
 
             case 'pause':
                 // Marcar como "Suspender"
                 $sql = "UPDATE curso SET Status = 'Suspender' WHERE id_Curso = $courseId";
                 $conn->query($sql);
                 break;
-
+                //Fin
             case 'cancel':
                 // Eliminar la fecha del curso
                 $sql = "UPDATE curso SET FechaHoraC = NULL, FechaHoraA = NULL WHERE id_Curso = $courseId";
@@ -52,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $sql = "UPDATE curso SET Status = 'Falta Informacion' WHERE id_Curso = $courseId";
                 $conn->query($sql);
                 break;
-
+                //Fin
             case 'complete':
                 // Eliminar la fecha del curso y el nombre del docente
                 $sql = "UPDATE curso SET FechaHoraC = NULL, FechaHoraA = NULL, Status = 'Concluir' WHERE id_Curso = $courseId";
@@ -60,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $sql = "UPDATE convocatoria SET DocenteConvoca = '' WHERE Id_Convoca = (SELECT Fk_id_ofer FROM curso WHERE id_Curso = $courseId)";
                 $conn->query($sql);
                 break;
-
+                //Fin
             case 'launch':
                 // Lanzar curso
                 $fechaInicio = $_POST['fechaInicio'];
@@ -69,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $conn->query($sql);
                 break;
         }
-
+                //Fin
         // Verificar y actualizar el estado según la lógica de cupo y fechas
         $capacidadSql = "SELECT Capacidad FROM grupo WHERE Fk_id_Curso = $courseId";
         $capacidadResult = $conn->query($capacidadSql);
@@ -99,6 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html>
@@ -166,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <button class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#editModal{$courseId}'><i class='fa fa-edit'></i></button>
                         <form method='post' style='display:inline-block'>
                           <input type='hidden' name='id_Curso' value='{$courseId}'>
-                          <input type='hidden' name='action' value='delete'>
+                          <input type='hidden' name='action' value='cancel'>
                           <button type='submit' class='btn btn-danger'><i class='fa fa-trash'></i></button>
                         </form>
                         <form method='post' style='display:inline-block'>
@@ -176,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </form>
                         <form method='post' style='display:inline-block'>
                           <input type='hidden' name='id_Curso' value='{$courseId}'>
-                          <input type='hidden' name='action' value='cancel'>
+                          <input type='hidden' name='action' value='delete'>
                           <button type='submit' class='btn btn-secondary'><i class='fa fa-times'></i></button>
                         </form>
                         <form method='post' style='display:inline-block'>
@@ -241,9 +244,9 @@ $result->data_seek(0);
 while($row = $result->fetch_assoc()) {
   $courseId = $row['id_Curso'];
   $studentsSql = "SELECT user.vNombre FROM grupo 
-                  JOIN alumno ON alumno.Fk_grupo = alumnos.id_Alumno
+                  JOIN alumnos ON grupo.Fk_id_Alumno = alumnos.id_Alumno
                   JOIN user ON alumnos.Fk_id_User = user.id_User
-                  WHERE alumnos.Fk_grupo = $courseId";
+                  WHERE grupo.Fk_id_Curso = $courseId";
   $studentsResult = $conn->query($studentsSql);
   $students = [];
   while($student = $studentsResult->fetch_assoc()) {

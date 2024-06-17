@@ -1,15 +1,19 @@
 <?php
 include 'conexion.php';
 
+$response = array("success" => false);
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nombreCurso = $_POST['nombreCurso'];
     $docente = $_POST['docente'];
     $descripcion = $_POST['descripcion'];
     $modalidad = $_POST['modalidad'];
+    $tipo = $_POST['tipo'];  // Corrección: Usar el nombre de campo correcto
     $costo = $_POST['costo'];
+    $status = 'Falta Informacion';  // Aseguramos que el estado es "Falta Informacion"
 
     // Verificar si se ha subido un archivo
-    if(isset($_FILES['imagen']) && $_FILES['imagen']['error'] == 0){
+    if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] == 0) {
         $imagen = $_FILES['imagen']['name'];
         $target_dir = "img/";
         $imageFileType = strtolower(pathinfo($imagen, PATHINFO_EXTENSION));
@@ -21,10 +25,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         // Mover el archivo subido al directorio especificado
-        if(move_uploaded_file($_FILES["imagen"]["tmp_name"], $target_file)){
+        if (move_uploaded_file($_FILES["imagen"]["tmp_name"], $target_file)) {
             echo "El archivo ha sido subido exitosamente a: " . $target_file;
         } else {
             echo "Lo siento, hubo un error al subir tu archivo.";
+            $target_file = null;  // Establecer a null si hubo un error al mover el archivo
         }
     } else {
         echo "No se ha subido ninguna imagen o ha habido un error al subir la imagen.";
@@ -32,14 +37,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Insertar datos en la base de datos
-    $sql = "INSERT INTO curso (NombreCurso, DescripcionCurso, Modalidad, CostoCurso, ImagenCurso) VALUES ('$nombreCurso', '$descripcion', '$modalidad', '$costo', '$target_file')";
+    $sql = "INSERT INTO curso (NombreCurso, DescripcionCurso, Modalidad, TipoSer, CostoCurso, ImagenCurso,  Status) 
+            VALUES ('$nombreCurso', '$descripcion', '$modalidad', '$tipo',  '$costo','$target_file', '$status')";
     
     if ($conn->query($sql) === TRUE) {
-        echo "Nuevo registro creado con éxito";
+        $response["success"] = true;
+        
+        // Redirigir al usuario a "cursos.php" después de 5 segundos
+        header("Refresh: 5; url=cursos.php");
+        exit;
     } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
+        $response["error"] = "Error: " . $sql . "<br>" . $conn->error;
     }
 
     $conn->close();
 }
+
+echo json_encode($response);
 ?>

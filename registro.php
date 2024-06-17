@@ -34,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         document.getElementById('modal').style.display = 'block';
                         setTimeout(function() {
                             window.location.href = 'login.php';
-                        }, 5000);
+                        }, 2000);
                     });
                   </script>";
         } else {

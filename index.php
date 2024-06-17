@@ -20,7 +20,7 @@ try {
             JOIN 
                 oferta o ON c.Fk_id_ofer = o.id_ofer
             WHERE 
-                c.Status = 'Disponible'
+                c.Status = 'Falta Informacion'
             ORDER BY c.FechaHoraC ASC
             LIMIT 4";
 
@@ -34,26 +34,60 @@ try {
 
 <?php
 
+
+try {
+    $sql = "SELECT 
+                c.id_Curso,
+                c.NombreCurso,
+                c.Perfil,
+                c.DescripcionCurso,
+                c.FechaHoraC,
+                c.FechaHoraA,
+                c.NombreDoc,
+                c.Modalidad,
+                c.CostoCurso,
+                c.ImagenCurso,
+                o.NombreOfer
+            FROM 
+                curso c
+            JOIN 
+                oferta o ON c.Fk_id_ofer = o.id_ofer
+            WHERE 
+                c.Status = 'Disponible'
+            ORDER BY c.FechaHoraC ASC
+            LIMIT 4";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    $cursosD = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
+}
+?>
+
+<?php
+
 try {
 
 
-  // Obtener conteo de cursos
-  $sqlCursos = "SELECT COUNT(*) AS totalCursos FROM curso WHERE TipoSer = 'Curso' AND Status = 'Disponible'";
-  $stmtCursos = $pdo->prepare($sqlCursos);
-  $stmtCursos->execute();
-  $totalCursos = $stmtCursos->fetch(PDO::FETCH_ASSOC)['totalCursos'];
+// Obtener conteo de cursos
+$sqlCursos = "SELECT COUNT(*) AS totalCursos FROM curso WHERE TipoSer = 'Curso' AND Status IN ('Disponible', 'Concluir', 'Suspender', 'Falta Informacion')";
+$stmtCursos = $pdo->prepare($sqlCursos);
+$stmtCursos->execute();
+$totalCursos = $stmtCursos->fetch(PDO::FETCH_ASSOC)['totalCursos'];
 
-  // Obtener conteo de talleres
-  $sqlTalleres = "SELECT COUNT(*) AS totalTalleres FROM curso WHERE TipoSer = 'Taller' AND Status = 'Disponible'";
-  $stmtTalleres = $pdo->prepare($sqlTalleres);
-  $stmtTalleres->execute();
-  $totalTalleres = $stmtTalleres->fetch(PDO::FETCH_ASSOC)['totalTalleres'];
+// Obtener conteo de talleres
+$sqlTalleres = "SELECT COUNT(*) AS totalTalleres FROM curso WHERE TipoSer = 'Taller' AND Status IN ('Disponible', 'Concluir', 'Suspender', 'Falta Informacion')";
+$stmtTalleres = $pdo->prepare($sqlTalleres);
+$stmtTalleres->execute();
+$totalTalleres = $stmtTalleres->fetch(PDO::FETCH_ASSOC)['totalTalleres'];
 
-  // Obtener conteo de servicios tecnológicos
-  $sqlServicios = "SELECT COUNT(*) AS totalServicios FROM curso WHERE TipoSer = 'Servicio Tecnologico' AND Status = 'Disponible'";
-  $stmtServicios = $pdo->prepare($sqlServicios);
-  $stmtServicios->execute();
-  $totalServicios = $stmtServicios->fetch(PDO::FETCH_ASSOC)['totalServicios'];
+// Obtener conteo de servicios tecnológicos
+$sqlServicios = "SELECT COUNT(*) AS totalServicios FROM curso WHERE TipoSer = 'Servicio Tecnologico' AND Status IN ('Disponible', 'Concluir', 'Suspender', 'Falta Informacion')";
+$stmtServicios = $pdo->prepare($sqlServicios);
+$stmtServicios->execute();
+$totalServicios = $stmtServicios->fetch(PDO::FETCH_ASSOC)['totalServicios'];
+
 
   // Obtener conteo de clientes satisfechos
   $sqlClientes = "SELECT COUNT(DISTINCT Fk_id_user) AS totalClientes FROM diplomas";
@@ -459,27 +493,28 @@ span.psw {
   <p class="w3-center w3-large">Cursos de calidad para gente de calidad</p>
 
   <div class="w3-row-padding" style="margin-top:64px">
-    <?php
-      if (!empty($cursos)) {
-        foreach ($cursos as $curso) {
-          if ($curso['FechaHoraC'] === null && $curso['FechaHoraA'] === null) {
-    ?>
-    <div class="w3-col l3 m6">
-      <img src="<?php echo htmlspecialchars($curso['ImagenCurso'] ?? 'default.jpg'); ?>" style="width:100%" onclick="onClick(this)" class="w3-hover-opacity" alt="<?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?><?php echo htmlspecialchars($curso['DescripcionCurso'] ?? ''); ?>">
-      <p class="w3-center w3-large"><?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?></p>
-      
-    </div>
-    <?php
-          }
-        }
-      } else {
-    ?>
+  <?php if (!empty($cursosD)) { ?>
+    <?php foreach ($cursosD as $curso) { ?>
+      <div class="w3-col l3 m6 w3-margin-bottom">
+      <img src="<?php echo htmlspecialchars($curso['ImagenCurso'] ?? 'default.jpg'); ?>" alt="<?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?>" style="width:100%">        <div class="w3-card">
+          <div class="w3-container">
+            <h3><?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?></h3>
+            <p class="w3-opacity"><?php echo htmlspecialchars($curso['NombreOfer'] ?? ''); ?></p>
+            <p><?php echo htmlspecialchars($curso['DescripcionCurso'] ?? ''); ?></p>
+            <p>Docente: <?php echo htmlspecialchars($curso['NombreDoc'] ?? ''); ?></p>
+            <p>Modalidad: <?php echo htmlspecialchars($curso['Modalidad'] ?? ''); ?></p>
+            <p>Costo: $<?php echo htmlspecialchars($curso['CostoCurso'] ?? ''); ?></p>
+            <p><a href="login.php" class="w3-button w3-green-custom w3-block"><i class="fa fa-user"> </i> ¡Registrarme ahora!</a></p>
+          </div>
+        </div>
+      </div>
+    <?php } ?>
+  <?php } else { ?>
     <p class="w3-center">No hay cursos disponibles en este momento.</p>
-    <?php
-      }
-    ?>
+  <?php } ?>
   </div>
 </div>
+
 <!-- Fin Servicios -->  <!-- Fin Servicios -->
   </div>
 </div>

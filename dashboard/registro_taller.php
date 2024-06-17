@@ -1,55 +1,6 @@
 <?php include 'conexion.php'; ?>
 <?php include 'indexa.php'; ?>
-<?php
-session_start();
-require 'conexion.php';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nombreCurso = $_POST['nombreCurso'];
-    $docente = $_POST['docente'];
-    $descripcion = $_POST['descripcion'];
-    $modalidad = $_POST['modalidad'];
-    $tipo = $_POST['tipo'];
-    $costo = $_POST['costo'];
-    $imagen = $_FILES['imagen']['name'];
-    $fechaInicio = isset($_POST['fechaInicio']) ? $_POST['fechaInicio'] : null;
-    $fechaFin = isset($_POST['fechaFin']) ? $_POST['fechaFin'] : null;
-
-    $targetDir = "img/";
-    $targetFile = $targetDir . basename($imagen);
-    move_uploaded_file($_FILES['imagen']['tmp_name'], $targetFile);
-
-    $status = 'Disponible';
-    if (empty($fechaInicio) || empty($fechaFin)) {
-        $status = 'Falta Informacion';
-    }
-
-    try {
-        $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        $sql = "INSERT INTO curso (Fk_id_ofer, NombreCurso, NombreDoc, DescripcionCurso, Modalidad, CostoCurso, ImagenCurso, FechaHoraC, FechaHoraA, Status, TipoSer) 
-                VALUES (NULL, :nombreCurso, :docente, :descripcion, :modalidad, :costo, :imagen, :fechaInicio, :fechaFin, :status, 'Curso')";
-
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':nombreCurso', $nombreCurso);
-        $stmt->bindParam(':docente', $docente);
-        $stmt->bindParam(':descripcion', $descripcion);
-        $stmt->bindParam(':modalidad', $modalidad);
-        $stmt->bindParam(':tipo', $tipo);
-        $stmt->bindParam(':costo', $costo);
-        $stmt->bindParam(':imagen', $targetFile);
-        $stmt->bindParam(':fechaInicio', $fechaInicio);
-        $stmt->bindParam(':fechaFin', $fechaFin);
-        $stmt->bindParam(':status', $status);
-        $stmt->execute();
-
-        echo "Curso registrado con éxito.";
-    } catch (PDOException $e) {
-        echo "Error: " . $e->getMessage();
-    }
-}
-?>
 
 
 
@@ -92,8 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </select>
         </div>
         <div class="mb-3">
-            <label for="tipo" class="form-label">Tipo de curso</label>
-            <select class="form-select" id="modalidad" name="modalidad" required>
+            <label for="tipo" class="form-label">Tipo de servicio</label>
+            <select class="form-select" id="tipo" name="tipo" required>
                 <option value="Curso">Curso</option>
                 <option value="Taller">Taller</option>
                 <option value="Servicio Tecnologico">Servicio Tecnologico</option>

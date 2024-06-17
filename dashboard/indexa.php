@@ -16,6 +16,14 @@ header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
 header("Expires: 0");
 
+// Obtener el nombre del tipo de usuario
+$query = "SELECT NombreTypeUser FROM typeuser WHERE id_TypeUser = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $user_type_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$user_type = $result->fetch_assoc()['NombreTypeUser'];
+
 // Función para generar el menú
 function generateMenu($user_type_id, $conn) {
     $menu = "<ul class='nav nav-pills flex-column mb-auto'>";
@@ -36,11 +44,9 @@ function generateMenu($user_type_id, $conn) {
             break;
         case 'Alumno':
             $menu .= "<li class='nav-item'><a href='cliente.php' class='nav-link'><i class='fas fa-file-invoice'></i> Clientes</a></li>";
-
             break;
         case 'Aspirante':
-            $menu .= "<li class='nav-item'><a href='inicio.php' class='nav-link'><i class='fas fa-user-tie'></i> Inicio</a></li>";
-
+            $menu .= "<li class='nav-item'><a href='servicios.php' class='nav-link'><i class='fas fa-user-tie'></i> Inicio</a></li>";
             break;
     }
     $menu .= "<li class='nav-item'><a href='cerrar_sesion.php' class='nav-link'><i class='fas fa-sign-out-alt'></i> Cerrar sesión</a></li>";
@@ -94,11 +100,11 @@ function generateMenu($user_type_id, $conn) {
     <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
         <img src="/w3images/avatar2.png" class="rounded-circle me-2" alt="Avatar" width="48" height="48">
         <span class="fs-4">Bienvenido, <strong><?php echo $_SESSION['username']; ?></strong></span>
+        <span class="fs-6">(<?php echo $user_type; ?>)</span>
     </a>
     <hr>
     <?php echo generateMenu($user_type_id, $conn); ?>
     <hr>
-
 </div>
 
 <!-- Add your page content here -->

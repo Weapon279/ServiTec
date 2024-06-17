@@ -2,7 +2,7 @@
 // Configuración de la base de datos
 $host = 'localhost';
 $db = 'cursos';
-$user = 'Admin';
+$user = 'root';
 $pass = '';
 
 try {

@@ -20,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Redirigir al dashboard según el tipo de usuario
         if ($user['Fk_TypeUser'] == 4) {
-            header("Location: dashboard/a/dashboard.php");
+            header("Location: dashboard/dash.php");
         } elseif ($user['Fk_TypeUser'] == 3) {
             header("Location: dashboard/dash.php");
         } else {

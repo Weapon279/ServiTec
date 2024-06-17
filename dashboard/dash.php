@@ -1,4 +1,3 @@
-
 <?php include 'indexa.php'; ?>
 
 
@@ -38,7 +37,7 @@ $resultUsuarios = $conn->query($queryUsuarios);
 $usuarios = $resultUsuarios->fetch_assoc()['total'];
 
 // Obtener los próximos cursos
-$sqlProximosCursos = "SELECT NombreCurso, FechaI FROM grupo INNER JOIN curso ON grupo.Fk_id_Curso = curso.id_Curso WHERE FechaI > NOW() ORDER BY FechaI ASC";
+$sqlProximosCursos = "SELECT curso.id_Curso, curso.NombreCurso, curso.Modalidad, curso.FechaHoraC, curso.FechaHoraA, curso.Status FROM curso";
 $resultProximosCursos = $conn->query($sqlProximosCursos);
 
 // Obtener cursos sin fecha
@@ -52,7 +51,7 @@ $conn->close();
 <!DOCTYPE html>
 <html>
 <head>
-<title>Admin</title>
+<title>DASHBOARD</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -60,6 +59,8 @@ $conn->close();
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+
 <link rel="stylesheet" href="css/style.css">
 <style>
 html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
@@ -116,7 +117,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
                 <h3><?php echo $usuarios; ?></h3>
             </div>
             <div class="w3-clear"></div>
-            <h4>Usuarios</h4>
+            <h4>Alumnos</h4>
         </div>
     </div>
   </div>
@@ -142,7 +143,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
                     <!-- Listar próximos cursos desde la base de datos -->
                     <?php
                     while($row = $resultProximosCursos->fetch_assoc()) {
-                        echo "<li class='list-group-item'>" . $row['NombreCurso'] . " - " . $row['FechaI'] . "</li>";
+                        echo "<li class='list-group-item'>" . $row['NombreCurso'] . " - " . $row['FechaHoraC'] . "</li>";
                     }
                     ?>
                 </ul>

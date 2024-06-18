@@ -1,36 +1,54 @@
 <?php
 include 'indexa.php';
 include 'conexion.php';
+session_start();
+
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $alumno_id = $_POST['alumno_id'];
+    $grupo_id = $_POST['grupo_id'];
+    $accion = $_POST['accion'];
+
+    if ($accion == 'aceptar') {
+        // Actualizar el estado del aspirante a aceptado
+        $sql = "UPDATE alumnos SET Status = 1 WHERE id_Alumno = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $alumno_id);
+        $stmt->execute();
+    } elseif ($accion == 'rechazar') {
+        // Actualizar el estado del aspirante a rechazado
+        $sql = "UPDATE alumnos SET Status = 2 WHERE id_Alumno = ?"; // 2 para rechazado
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $alumno_id);
+        $stmt->execute();
+    }
+
+    // Redirigir para evitar reenvío del formulario
+    header("Location: registroc.php");
+    exit();
+}
 ?>
 
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <title>Grupos</title>
 </head>
 <body>
     <div class="container mt-5">
         <h1 class="text-center mb-4">Grupos</h1>
         <?php
-
-        // Obtener la información de los grupos y cursos
-        $sql = "SELECT g.id_Grupo, g.ClaveGrupo, g.Capacidad, g.FechaI, g.FechaF, c.NombreCurso 
+        $sql = "SELECT g.id_Grupo, g.ClaveGrupo, g.Capacidad, g.FechaHoraC, g.FechaHoraA, c.NombreCurso 
                 FROM grupo g
                 JOIN curso c ON g.Fk_id_Curso = c.id_Curso";
         $result = $conn->query($sql);
 
         if ($result->num_rows > 0) {
             echo "<table class='table table-striped'>
-                    <thead class='table table-striped'>
+                    <thead>
                         <tr>
                             <th>Clave del Grupo</th>
                             <th>Nombre del Curso</th>
@@ -38,7 +56,7 @@ include 'conexion.php';
                             <th>Fecha de Inicio</th>
                             <th>Fecha de Fin</th>
                             <th>Ver Alumnos</th>
-                            <th>Solicitud</th>
+                            <th>Ver Aspirantes</th>
                         </tr>
                     </thead>
                     <tbody>";
@@ -49,12 +67,12 @@ include 'conexion.php';
                         <td>{$row['ClaveGrupo']}</td>
                         <td>{$row['NombreCurso']}</td>
                         <td>{$row['Capacidad']}</td>
-                        <td>{$row['FechaI']}</td>
-                        <td>{$row['FechaF']}</td>
+                        <td>{$row['FechaHoraC']}</td>
+                        <td>{$row['FechaHoraA']}</td>
                         <td><button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#alumnosModal{$groupId}'>Ver Alumnos</button></td>
-                        <td><button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#solicitudModal{$groupId}'>Solicitud</button></td>
+                        <td><button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#aspirantesModal{$groupId}'>Ver Aspirantes</button></td>
                       </tr>";
-                
+
                 // Modal para mostrar los alumnos del grupo
                 echo "<div class='modal fade' id='alumnosModal{$groupId}' tabindex='-1' aria-labelledby='alumnosModalLabel{$groupId}' aria-hidden='true'>
                         <div class='modal-dialog'>
@@ -65,11 +83,10 @@ include 'conexion.php';
                             </div>
                             <div class='modal-body'>";
                 
-                // Obtener los alumnos del grupo
                 $studentsSql = "SELECT u.vNombre 
                                 FROM alumnos a
                                 JOIN user u ON a.Fk_id_User = u.id_User
-                                WHERE a.Fk_Id_Grupo = ?";
+                                WHERE a.Fk_grupo = ?";
                 $stmt = $conn->prepare($studentsSql);
                 $stmt->bind_param("i", $groupId);
                 $stmt->execute();
@@ -90,20 +107,19 @@ include 'conexion.php';
                       </div>";
 
                 // Modal para mostrar las solicitudes de los aspirantes
-                echo "<div class='modal fade' id='solicitudModal{$groupId}' tabindex='-1' aria-labelledby='solicitudModalLabel{$groupId}' aria-hidden='true'>
+                echo "<div class='modal fade' id='aspirantesModal{$groupId}' tabindex='-1' aria-labelledby='aspirantesModalLabel{$groupId}' aria-hidden='true'>
                         <div class='modal-dialog'>
                           <div class='modal-content'>
                             <div class='modal-header'>
-                              <h5 class='modal-title' id='solicitudModalLabel{$groupId}'>Solicitudes para el Grupo {$row['ClaveGrupo']}</h5>
+                              <h5 class='modal-title' id='aspirantesModalLabel{$groupId}'>Solicitudes para el Grupo {$row['ClaveGrupo']}</h5>
                               <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
                             </div>
                             <div class='modal-body'>";
-                
-                // Obtener las solicitudes de los aspirantes para el grupo
-                $applicationsSql = "SELECT u.vNombre, a.Status 
+
+                $applicationsSql = "SELECT u.vNombre, a.id_Alumno
                                     FROM alumnos a
                                     JOIN user u ON a.Fk_id_User = u.id_User
-                                    WHERE a.Fk_Id_Grupo = ? AND a.Status = 0";
+                                    WHERE a.Fk_grupo = ? AND a.Status = 0";
                 $stmt = $conn->prepare($applicationsSql);
                 $stmt->bind_param("i", $groupId);
                 $stmt->execute();
@@ -113,8 +129,18 @@ include 'conexion.php';
                     echo "<ul>";
                     while ($application = $applicationsResult->fetch_assoc()) {
                         echo "<li>{$application['vNombre']}
-                              <button type='button' class='btn btn-success'>Aceptar</button>
-                              <button type='button' class='btn btn-danger'>Rechazar</button>
+                              <form method='POST' action='registroc.php' style='display:inline;'>
+                                <input type='hidden' name='alumno_id' value='{$application['id_Alumno']}'>
+                                <input type='hidden' name='grupo_id' value='{$groupId}'>
+                                <input type='hidden' name='accion' value='aceptar'>
+                                <button type='submit' class='btn btn-success'>Aceptar</button>
+                              </form>
+                              <form method='POST' action='registroc.php' style='display:inline;'>
+                                <input type='hidden' name='alumno_id' value='{$application['id_Alumno']}'>
+                                <input type='hidden' name='grupo_id' value='{$groupId}'>
+                                <input type='hidden' name='accion' value='rechazar'>
+                                <button type='submit' class='btn btn-danger'>Rechazar</button>
+                              </form>
                              </li>";
                     }
                     echo "</ul>";

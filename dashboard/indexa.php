@@ -46,7 +46,7 @@ function generateMenu($user_type_id, $conn) {
             $menu .= "<li class='nav-item'><a href='cliente.php' class='nav-link'><i class='fas fa-file-invoice'></i> Clientes</a></li>";
             break;
         case 'Aspirante':
-            $menu .= "<li class='nav-item'><a href='servicios.php' class='nav-link'><i class='fas fa-user-tie'></i> Inicio</a></li>";
+            $menu .= "<li class='nav-item'><a href='registroc.php' class='nav-link'><i class='fas fa-user-tie'></i> Inicio</a></li>";
             break;
     }
     $menu .= "<li class='nav-item'><a href='cerrar_sesion.php' class='nav-link'><i class='fas fa-sign-out-alt'></i> Cerrar sesión</a></li>";

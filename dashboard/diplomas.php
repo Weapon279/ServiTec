@@ -4,7 +4,7 @@
 <div class="w3-main" style="margin-left:300px;margin-top:43px;">
 
 <div class="container mt-5">
-    <h2>Gestión de Diplomas</h2>
+    <h2>Gestión de Contancias</h2>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -19,7 +19,7 @@
             while($row = $result->fetch_assoc()) {
                 echo "<tr>
                         <td>{$row['NombreDiploma']}</td>
-                        <td><a href='{$row['LinkDiploma']}' target='_blank'>Ver Diploma</a></td>
+                        <td><a href='{$row['LinkDiploma']}' target='_blank'>Ver Contancias</a></td>
                     </tr>";
             }
             ?>

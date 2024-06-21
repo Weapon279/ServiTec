@@ -24,7 +24,7 @@ try {
             ORDER BY c.FechaHoraC ASC
             LIMIT 4";
 
-    $stmt = $pdo->prepare($sql);
+    $stmt = $conn->prepare($sql);
     $stmt->execute();
     $cursos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -57,7 +57,7 @@ try {
             ORDER BY c.FechaHoraC ASC
             LIMIT 4";
 
-    $stmt = $pdo->prepare($sql);
+    $stmt = $conn->prepare($sql);
     $stmt->execute();
     $cursosD = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -72,26 +72,26 @@ try {
 
 // Obtener conteo de cursos
 $sqlCursos = "SELECT COUNT(*) AS totalCursos FROM curso WHERE TipoSer = 'Curso' AND Status IN ('Disponible', 'Concluir', 'Suspender', 'Falta Informacion')";
-$stmtCursos = $pdo->prepare($sqlCursos);
+$stmtCursos = $conn->prepare($sqlCursos);
 $stmtCursos->execute();
 $totalCursos = $stmtCursos->fetch(PDO::FETCH_ASSOC)['totalCursos'];
 
 // Obtener conteo de talleres
 $sqlTalleres = "SELECT COUNT(*) AS totalTalleres FROM curso WHERE TipoSer = 'Taller' AND Status IN ('Disponible', 'Concluir', 'Suspender', 'Falta Informacion')";
-$stmtTalleres = $pdo->prepare($sqlTalleres);
+$stmtTalleres = $conn->prepare($sqlTalleres);
 $stmtTalleres->execute();
 $totalTalleres = $stmtTalleres->fetch(PDO::FETCH_ASSOC)['totalTalleres'];
 
 // Obtener conteo de servicios tecnológicos
 $sqlServicios = "SELECT COUNT(*) AS totalServicios FROM curso WHERE TipoSer = 'Servicio Tecnologico' AND Status IN ('Disponible', 'Concluir', 'Suspender', 'Falta Informacion')";
-$stmtServicios = $pdo->prepare($sqlServicios);
+$stmtServicios = $conn->prepare($sqlServicios);
 $stmtServicios->execute();
 $totalServicios = $stmtServicios->fetch(PDO::FETCH_ASSOC)['totalServicios'];
 
 
   // Obtener conteo de clientes satisfechos
   $sqlClientes = "SELECT COUNT(DISTINCT Fk_id_user) AS totalClientes FROM diplomas";
-  $stmtClientes = $pdo->prepare($sqlClientes);
+  $stmtClientes = $conn->prepare($sqlClientes);
   $stmtClientes->execute();
   $totalClientes = $stmtClientes->fetch(PDO::FETCH_ASSOC)['totalClientes'];
 

@@ -7,7 +7,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nPass = $_POST['nPass'];
 
     // Consulta para obtener el usuario y tipo de usuario
-    $stmt = $pdo->prepare("SELECT id_User, Fk_TypeUser, vNombre, vApellidoP, vApellidoM, vCorreo, nPass FROM user WHERE vCorreo = :vCorreo");
+    $stmt = $conn->prepare("SELECT id_User, Fk_TypeUser, vNombre, vApellidoP, vApellidoM, vCorreo, nPass FROM user WHERE vCorreo = :vCorreo");
     $stmt->bindParam(':vCorreo', $vCorreo);
     $stmt->execute();
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } elseif ($user['Fk_TypeUser'] == 3) {
             header("Location: dashboard/dash.php");
         } else {
-            header("Location: dashboard/dashboard.php");
+            header("Location: dashboard/dash.php");
         }
         exit();
     } else {

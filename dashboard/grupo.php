@@ -4,27 +4,22 @@ include 'conexion.php';
 session_start();
 
 
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $alumno_id = $_POST['alumno_id'];
-    $grupo_id = $_POST['grupo_id'];
     $accion = $_POST['accion'];
 
     if ($accion == 'aceptar') {
-        // Actualizar el estado del aspirante a aceptado
         $sql = "UPDATE alumnos SET Status = 1 WHERE id_Alumno = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $alumno_id);
-        $stmt->execute();
     } elseif ($accion == 'rechazar') {
-        // Actualizar el estado del aspirante a rechazado
-        $sql = "UPDATE alumnos SET Status = 2 WHERE id_Alumno = ?"; // 2 para rechazado
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $alumno_id);
-        $stmt->execute();
+        $sql = "UPDATE alumnos SET Status = 2 WHERE id_Alumno = ?";
     }
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $alumno_id);
+    $stmt->execute();
 
     // Redirigir para evitar reenvío del formulario
-    header("Location: registroc.php");
+    header("Location: grupo.php");
     exit();
 }
 ?>
@@ -82,11 +77,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                               <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
                             </div>
                             <div class='modal-body'>";
-                
+
                 $studentsSql = "SELECT u.vNombre 
                                 FROM alumnos a
                                 JOIN user u ON a.Fk_id_User = u.id_User
-                                WHERE a.Fk_grupo = ?";
+                                WHERE a.Fk_Id_Grupo = ?";
                 $stmt = $conn->prepare($studentsSql);
                 $stmt->bind_param("i", $groupId);
                 $stmt->execute();
@@ -119,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $applicationsSql = "SELECT u.vNombre, a.id_Alumno
                                     FROM alumnos a
                                     JOIN user u ON a.Fk_id_User = u.id_User
-                                    WHERE a.Fk_grupo = ? AND a.Status = 0";
+                                    WHERE a.Fk_Id_Grupo = ? AND a.Status = 4";
                 $stmt = $conn->prepare($applicationsSql);
                 $stmt->bind_param("i", $groupId);
                 $stmt->execute();
@@ -129,15 +124,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     echo "<ul>";
                     while ($application = $applicationsResult->fetch_assoc()) {
                         echo "<li>{$application['vNombre']}
-                              <form method='POST' action='registroc.php' style='display:inline;'>
+                              <form method='POST' action='grupo.php' style='display:inline;'>
                                 <input type='hidden' name='alumno_id' value='{$application['id_Alumno']}'>
-                                <input type='hidden' name='grupo_id' value='{$groupId}'>
                                 <input type='hidden' name='accion' value='aceptar'>
                                 <button type='submit' class='btn btn-success'>Aceptar</button>
                               </form>
-                              <form method='POST' action='registroc.php' style='display:inline;'>
+                              <form method='POST' action='grupo.php' style='display:inline;'>
                                 <input type='hidden' name='alumno_id' value='{$application['id_Alumno']}'>
-                                <input type='hidden' name='grupo_id' value='{$groupId}'>
                                 <input type='hidden' name='accion' value='rechazar'>
                                 <button type='submit' class='btn btn-danger'>Rechazar</button>
                               </form>

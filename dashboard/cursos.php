@@ -31,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         WHERE Fk_id_Curso = $courseId";
                 $conn->query($sql);
                 break;
+                //Fin  Editar curso
 
             case 'delete':
                 // Eliminar la fecha del curso y el nombre del docente, y cambiar el estado
@@ -106,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Gestión de Cursos</title>
+    <title>Gestión de Servicios</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -120,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="w3-main" style="margin-left:300px;margin-top:43px;">
 
 <div class="container mt-5">
-  <h2>Gestión de Cursos</h2>
+  <h2>Gestión de Servicios</h2>
   <table class="table table-striped">
     <thead>
       <tr>

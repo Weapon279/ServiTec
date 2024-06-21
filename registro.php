@@ -1,6 +1,7 @@
 <?php
 require 'modelo/conexion.php';
 
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $vCorreo = $_POST['vCorreo'];
     $nPass = password_hash($_POST['nPass'], PASSWORD_DEFAULT); 
@@ -17,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     try {
-        $stmt = $pdo->prepare("INSERT INTO user (vCorreo, nPass, vNombre, vApellidoP, vApellidoM, nWhats, Fk_TypeUser, bStatus, iFechaHoraC, iFechaHoraA) VALUES (:vCorreo, :nPass, :vNombre, :vApellidoP, :vApellidoM, :nWhats, :Fk_TypeUser, :bStatus, NOW(), NOW())");
+        $stmt = $conn->prepare("INSERT INTO user (vCorreo, nPass, vNombre, vApellidoP, vApellidoM, nWhats, Fk_TypeUser, bStatus, iFechaHoraC, iFechaHoraA) VALUES (:vCorreo, :nPass, :vNombre, :vApellidoP, :vApellidoM, :nWhats, :Fk_TypeUser, :bStatus, NOW(), NOW())");
         
         $stmt->bindParam(':vCorreo', $vCorreo);
         $stmt->bindParam(':nPass', $nPass);
@@ -37,6 +38,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         }, 2000);
                     });
                   </script>";
+            
+            // Generar notificación para el administrador
+            $mensaje = "Nuevo usuario registrado: {$vNombre} {$vApellidoP}";
+            $tipo = "registro_usuario";
+
+            $sql = "INSERT INTO notificaciones (Tipo, Mensaje) VALUES (:tipo, :mensaje)";
+            $stmt_notif = $conn->prepare($sql);
+            $stmt_notif->bindParam(':tipo', $tipo);
+            $stmt_notif->bindParam(':mensaje', $mensaje);
+            $stmt_notif->execute();
         } else {
             echo "Error al registrar el usuario.";
         }
@@ -45,7 +56,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
-
 
 <!DOCTYPE html>
 <html>

@@ -3,6 +3,7 @@ include 'conexion.php';
 session_start();
 
 
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $curso_id = $_POST['curso_id'];
     $usuario_id = $_SESSION['id_User'];
@@ -13,12 +14,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_param("i", $usuario_id);
     if ($stmt->execute()) {
         echo "Interés registrado con éxito";
-        header("Location: registroc.php"); // Redirigir a una página de confirmación o listado de cursos
+        header("Location: registroc.php"); 
     } else {
         echo "Error al registrar el interés";
     }
     exit();
 }
+?>
+
+<?php
+include 'conexion.php';
+session_start();
+
+// Tu código de registro en grupo aquí
+
+// Generar notificación para el administrador
+$mensaje = "Nuevo aspirante registrado en grupo: {clave del grupo}";
+$tipo = "registro_grupo";
+
+$sql = "INSERT INTO notificaciones (Tipo, Mensaje) VALUES (?, ?)";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ss", $tipo, $mensaje);
+$stmt->execute();
 ?>
 
 <!DOCTYPE html>

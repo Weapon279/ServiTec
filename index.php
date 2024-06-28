@@ -99,6 +99,10 @@ $totalServicios = $stmtServicios->fetch(PDO::FETCH_ASSOC)['totalServicios'];
   echo "Error: " . $e->getMessage();
 }
 ?>
+<?php
+$directory = 'dashboard/img/';
+$images = glob($directory . '*.{jpg,webp,web,jpeg,png,gif}', GLOB_BRACE);
+?>
 
 <?php include 'modelo/conexion.php';?>
 <?php include 'contacto.php';?>
@@ -329,7 +333,42 @@ span.psw {
      width: 100%;
   }
 }
+
+/* Banner */
+
+/* Ajustes generales para el body */
+body {
+    font-family: 'Raleway', sans-serif;
+}
+
+/* Estilo para las imágenes del carrusel */
+.carousel-inner img {
+    width: 1920px; /* Ancho fijo */
+    height: 968px; /* Altura fija */
+    object-fit: cover; /* Asegura que la imagen cubra el área sin distorsión */
+}
+
+/* Estilo para el contenedor del carrusel */
+.carousel {
+    margin-top: 20px;
+}
+
+/* Estilos adicionales para mejorar la apariencia */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    padding: 10px;
+}
+
+.carousel-indicators li {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+
+
 </style>
+
 <!-- Fin login -->
 </head>
 <!-- Margen de tabla y menu lateral -->
@@ -341,14 +380,12 @@ span.psw {
 <!-- Navbar (sit on top) -->
 <div class="w3-top">
   <div class="w3-bar w3-green-custom w3-card" id="myNavbar">
-    <a href="index.php" class="w3-bar-item w3-button w3-wide">IGESEC</a>
+    <a href="index.php" class="w3-bar-item w3-button w3-wide">SIGESEC</a>
     <!-- Right-sided navbar links -->
     <div class="w3-right w3-hide-small">
       <a href="#acercade" class="w3-bar-item w3-button">ACERCA DE</a>
       <a href="#servicios" class="w3-bar-item w3-button"><i class="fa fa-th"></i> SERVICIOS</a>
       <a href="login.php" class="w3-bar-item w3-button" class="fa fa-user"><i class="fa fa-user"></i> LOGIN</a>
-
-
       <a href="#contacto" class="w3-bar-item w3-button"><i class="fa fa-envelope"></i> CONTACTO</a>
     </div>
 
@@ -367,25 +404,29 @@ span.psw {
 
 <!-- Indicators/dots -->
 <div class="carousel-indicators">
-  <button type="button" data-bs-target="#banner" data-bs-slide-to="0" class="active"></button>
-  <button type="button" data-bs-target="#banner" data-bs-slide-to="1"></button>
-  <button type="button" data-bs-target="#banner" data-bs-slide-to="2"></button>
+
 </div>
 
-<!-- The slideshow/carousel -->
-<div class="carousel-inner">
-  <div class="carousel-item active">
-    <img src="recursos/img/utem.webp" alt="utem" class="d-block" style="width:100%">
-  </div>
-  <div class="carousel-item">
-    <img src="Recursos/img/scrum.webp" alt="Scrum" class="d-block" style="width:100%">
-  </div>
-  <div class="carousel-item">
-    <img src="Recursos/img/scrum.webp" alt="Scrum" class="d-block" style="width:100%">
-  </div>
+
+
+    <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <?php
+            $active = 'active';
+            foreach ($images as $image) {
+                echo '<div class="carousel-item ' . $active . '">';
+                echo '<img src="' . $image . '" alt="Image" class="d-block w-100">';
+                echo '</div>';
+                $active = '';
+            }
+            ?>
+        </div>
+
+    </div>
+
 </div>
-<!-- Left and right controls/icons -->
-</div>
+
+
 
 <!-- Cursos, talleres y servicios -->
 <div class="w3-container" style="padding:128px 16px" id="acercade">
@@ -442,7 +483,7 @@ span.psw {
   <?php if (!empty($cursos)) { ?>
     <?php foreach ($cursos as $curso) { ?>
       <div class="w3-col l3 m6 w3-margin-bottom">
-      <img src="<?php echo htmlspecialchars($curso['ImagenCurso'] ?? 'default.jpg'); ?>" alt="<?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?>" style="width:100%">        <div class="w3-card">
+      <img src="<?php echo htmlspecialchars($curso['ImagenCurso'] ?? 'default.webp ,default.webp default,jpg'); ?>" alt="<?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?>" style="width:100%">        <div class="w3-card">
           <div class="w3-container">
             <h3><?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?></h3>
             <p class="w3-opacity"><?php echo htmlspecialchars($curso['NombreOfer'] ?? ''); ?></p>
@@ -486,7 +527,6 @@ span.psw {
 <!-- fin lista de cursos -->
 
 
-<!-- Servicios -->
 <!-- Servicios -->
 <div class="w3-container" style="padding:128px 16px" id="servicios">
   <h3 class="w3-center">SERVICIOS</h3>
@@ -587,10 +627,6 @@ span.psw {
 <div class="w3-container w3-light-grey" style="padding:128px 16px" id="contacto">
     <h3 class="w3-center">CONTACTO</h3>
     <p class="w3-center w3-large">Mantengámonos en contacto. Mandanos un mensaje:</p>
-    <div style="margin-top:48px">
-        <p><i class="fa fa-map-marker fa-fw w3-xxlarge w3-margin-right"></i> Camino hacia las humedades S/N, Salagua, 28869 Manzanillo, Col.</p>
-        <p><i class="fa fa-phone fa-fw w3-xxlarge w3-margin-right"></i> Telefono: 314 331 4450 </p>
-        <p><i class="fa fa-envelope fa-fw w3-xxlarge w3-margin-right"> </i> Email: utem@utem.com</p>
         <br>
         <form action="contacto.php" method="POST">
             <p><input class="w3-input w3-border" type="text" placeholder="Nombre" required name="Nombre"></p>
@@ -608,13 +644,19 @@ span.psw {
     <!-- fin Contacto --> 
 
 <!-- Footer -->
+ 
 <footer class="w3-center w3-green-custom w3-padding-10">
+<div style="margin-top:48px">
+        <p><i class="fa fa-map-marker fa-fw w3-xxlarge w3-margin-right"></i> Camino hacia las humedades S/N, Salagua, 28869 Manzanillo, Col.</p>
+        <p><i class="fa fa-phone fa-fw w3-xxlarge w3-margin-right"></i> Telefono: 314 331 4450 </p>
+        <p><i class="fa fa-envelope fa-fw w3-xxlarge w3-margin-right"> </i> Email: utem@utem.com</p>
   <div class="w3-xlarge w3-section">
     <i class="fa fa-facebook-official w3-hover-opacity"></i>
     <i class="fa fa-instagram w3-hover-opacity"></i>
     <i class="fa fa-twitter w3-hover-opacity"></i>
     <i class="fa fa-linkedin w3-hover-opacity"></i>
   </div>
+  
   <p> <a href="https://utem.edu.mx/" title="W3.CSS" target="_blank" class="w3-hover-text-green">Univiersidad Tecnologica de Manzanillo</a></p>
 </footer>
    </div>

@@ -9,18 +9,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $alumno_id = $_POST['alumno_id'];
     $accion = $_POST['accion'];
 
-    if ($accion == 'aceptar') {
-        $sql = "UPDATE alumnos SET Status = 1 WHERE id_Alumno = ?";
-    } elseif ($accion == 'rechazar') {
-        $sql = "UPDATE alumnos SET Status = 2 WHERE id_Alumno = ?";
-    }
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $alumno_id);
-    $stmt->execute();
+    try {
+        if ($accion == 'aceptar') {
+            // Cambiar el tipo de usuario a alumno (TypeUser = 2 en este ejemplo)
+            $sql = "UPDATE alumnos a 
+                    JOIN user u ON a.Fk_id_User = u.id_User 
+                    SET a.Status = 1, u.Fk_TypeUser = 4 
+                    WHERE a.id_Alumno = ?";
+        } elseif ($accion == 'rechazar') {
+            // Actualizar el estado a rechazado (Status = 2 en este ejemplo)
+            $sql = "UPDATE alumnos SET Status = 1 WHERE id_Alumno = ?";
+        }
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $alumno_id);
+        $stmt->execute();
 
-    // Redirigir para evitar reenvío del formulario
-    header("Location: grupo.php");
-    exit();
+        // Redirigir para evitar reenvío del formulario
+        header("Location: grupo.php");
+        exit();
+    } catch (Exception $e) {
+        header("Location: error.php"); // Redirigir a la página de error en caso de fallo en la base de datos
+        exit();
+    }
 }
 ?>
 
@@ -114,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $applicationsSql = "SELECT u.vNombre, a.id_Alumno
                                     FROM alumnos a
                                     JOIN user u ON a.Fk_id_User = u.id_User
-                                    WHERE a.Fk_Id_Grupo = ? AND a.Status = 4";
+                                    WHERE a.Fk_Id_Grupo = ? AND a.Status = 1";
                 $stmt = $conn->prepare($applicationsSql);
                 $stmt->bind_param("i", $groupId);
                 $stmt->execute();
@@ -124,12 +134,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     echo "<ul>";
                     while ($application = $applicationsResult->fetch_assoc()) {
                         echo "<li>{$application['vNombre']}
-                              <form method='POST' action='grupo.php' style='display:inline;'>
+                              <form method='POST' action='aceptar_solicitud.php' style='display:inline;'>
                                 <input type='hidden' name='alumno_id' value='{$application['id_Alumno']}'>
                                 <input type='hidden' name='accion' value='aceptar'>
                                 <button type='submit' class='btn btn-success'>Aceptar</button>
                               </form>
-                              <form method='POST' action='grupo.php' style='display:inline;'>
+                              <form method='POST' action='rechazar_solicitud.php' style='display:inline;'>
                                 <input type='hidden' name='alumno_id' value='{$application['id_Alumno']}'>
                                 <input type='hidden' name='accion' value='rechazar'>
                                 <button type='submit' class='btn btn-danger'>Rechazar</button>

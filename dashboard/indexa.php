@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 require 'conexion.php';
@@ -45,13 +44,14 @@ function generateMenu($user_type_id, $conn) {
             $menu .= "<li class='nav-item'><a href='diplomas.php' class='nav-link'><i class='fas fa-users'></i> Diplomas</a></li>";
             break;
         case 'Alumno':
-            $menu .= "<li class='nav-item'><a href='cliente.php' class='nav-link'><i class='fas fa-file-invoice'></i> Clientes</a></li>";
+            $menu .= "<li class='nav-item'><a href='dashb.php' class='nav-link'><i class='fas fa-user-tie'></i>Inicio</a></li>";
+            $menu .= "<li class='nav-item'><a href='registroc.php' class='nav-link'><i class='fas fa-file-invoice'></i> Registro de Servicio</a></li>";
+            $menu .= "<li class='nav-item'><a href='a/diplomasa.php' class='nav-link'><i class='fas fa-user-tie'></i>Diplomas</a></li>";
             break;
         case 'Aspirante':
-            $menu .= "<li class='nav-item'><a href='registroc.php' class='nav-link'><i class='fas fa-user-tie'></i> Inicio</a></li>";
+            $menu .= "<li class='nav-item'><a href='registroc.php' class='nav-link'><i class='fas fa-user-tie'></i> Registro de Servicio</a></li>";
             break;
     }
-    $menu .= "<li class='nav-item'><a href='cerrar_sesion.php' class='nav-link'><i class='fas fa-sign-out-alt'></i> Cerrar sesión</a></li>";
     $menu .= "</ul>";
     return $menu;
 }
@@ -64,6 +64,8 @@ function generateMenu($user_type_id, $conn) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+
     <link rel="stylesheet" href="css/style.css">
     <style>
         html, body {font-family: "Raleway", sans-serif;}
@@ -74,7 +76,7 @@ function generateMenu($user_type_id, $conn) {
 <!-- Top container -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-success fixed-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">IGESEC</a>
+        <a class="navbar-brand" href="#">SIGESEC</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>

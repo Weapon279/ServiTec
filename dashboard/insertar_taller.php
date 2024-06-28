@@ -8,9 +8,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $docente = $_POST['docente'];
     $descripcion = $_POST['descripcion'];
     $modalidad = $_POST['modalidad'];
-    $tipo = $_POST['tipo'];  // Corrección: Usar el nombre de campo correcto
+    $tipo = $_POST['tipo'];  
+    $status = 'Falta Informacion'; 
+    $claveGrupo = $_POST['claveGrupo'];
+    $capacidad = $_POST['capacidad'];
     $costo = $_POST['costo'];
-    $status = 'Falta Informacion';  // Aseguramos que el estado es "Falta Informacion"
+    $bstatus = '1';
 
     // Verificar si se ha subido un archivo
     if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] == 0) {
@@ -39,7 +42,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Insertar datos en la base de datos
     $sql = "INSERT INTO curso (NombreCurso, DescripcionCurso, Modalidad, TipoSer, CostoCurso, ImagenCurso,  Status) 
             VALUES ('$nombreCurso', '$descripcion', '$modalidad', '$tipo',  '$costo','$target_file', '$status')";
+
+    $sql = "INSERT INTO grupo (ClaveGrupo, Capacidad, Costo, FechaHoraC, Status) 
+            VALUES ('$claveGrupo','$capacidad','$costo', NOW(),'$bstatus')"; 
+
+$sql = "INSERT INTO convocatoria (DocenteConvoca, FechaHoraC, Status) 
+            VALUES ('$docente', NOW(),'$bstatus')"; 
     
+ 
     if ($conn->query($sql) === TRUE) {
         $response["success"] = true;
         

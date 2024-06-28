@@ -1,9 +1,6 @@
 <?php include 'conexion.php'; ?>
 <?php include 'indexa.php'; ?>
 
-
-
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -41,6 +38,7 @@
                 <option value="Virtual">Virtual</option>
                 <option value="Presencial">Presencial</option>
             </select>
+            
         </div>
         <div class="mb-3">
             <label for="tipo" class="form-label">Tipo de servicio</label>
@@ -48,12 +46,19 @@
                 <option value="Curso">Curso</option>
                 <option value="Taller">Taller</option>
                 <option value="Servicio Tecnologico">Servicio Tecnologico</option>
-
             </select>
         </div>
         <div class="mb-3">
             <label for="costo" class="form-label">Costo</label>
             <input type="number" class="form-control" id="costo" name="costo" required>
+        </div>
+        <div class="mb-3">
+            <label for="claveGrupo" class="form-label">Clave del Grupo</label>
+            <input type="text" class="form-control" id="claveGrupo" name="claveGrupo" required>
+        </div>
+        <div class="mb-3">
+            <label for="capacidad" class="form-label">Capacidad</label>
+            <input type="number" class="form-control" id="capacidad" name="capacidad" required>
         </div>
         <div class="mb-3">
             <label for="imagen" class="form-label">Imagen del Curso</label>

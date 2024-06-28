@@ -1,8 +1,8 @@
-<?php include 'indexb.php'; ?>
+<?php include '../indexa.php'; ?>
 
 <?php
 session_start();
-require 'conexion.php';
+require 'modelo/conexion.php';
 
 // Obtener el ID del usuario desde la sesión
 $userId = $_SESSION['userId'];

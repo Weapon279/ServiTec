@@ -35,7 +35,7 @@ function generateMenu($user_type_id, $conn) {
     $user_type = $result->fetch_assoc()['NombreTypeUser'];
 
     switch ($user_type) {
-        case 'Admin':
+        case 'Administrativo':
             $menu .= "<li class='nav-item'><a href='dash.php' class='nav-link'><i class='fas fa-users'></i> Inicio</a></li>";
             $menu .= "<li class='nav-item'><a href='cursos.php' class='nav-link'><i class='fas fa-users'></i> Servicios</a></li>";
             $menu .= "<li class='nav-item'><a href='grupo.php' class='nav-link'><i class='fas fa-users'></i> Gestion de grupos</a></li>";
@@ -82,14 +82,11 @@ function generateMenu($user_type_id, $conn) {
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+                <span class="nav-link active">Usuario: <?php echo $user_type; ?></span>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="notificaciones.php"><i class="fa fa-envelope"></i></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href=""><i class="fa fa-user"></i></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="fa fa-cog"></i></a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="../cerrar.php"><i class="fa fa-sign-out"></i> Cerrar Sesión</a>
@@ -102,9 +99,8 @@ function generateMenu($user_type_id, $conn) {
 <!-- Sidebar/menu -->
 <div class="d-flex flex-column flex-shrink-0 p-3 bg-white" style="width: 280px; height: 100vh; position: fixed; top: 56px;">
     <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
-        <img src="/w3images/avatar2.png" class="rounded-circle me-2" alt="Avatar" width="48" height="48">
+        <img src="img/avatar2.png" class="rounded-circle me-2" alt="Avatar" width="48" height="48">
         <span class="fs-4">Bienvenido, <strong><?php echo $_SESSION['username']; ?></strong></span>
-        <span class="fs-6">(<?php echo $user_type; ?>)</span>
     </a>
     <hr>
     <?php echo generateMenu($user_type_id, $conn); ?>

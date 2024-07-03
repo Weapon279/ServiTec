@@ -8,8 +8,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $docente = $_POST['docente'];
     $descripcion = $_POST['descripcion'];
     $modalidad = $_POST['modalidad'];
-    $tipo = $_POST['tipo'];  
-    $status = 'Falta Informacion'; 
+    $tipo = $_POST['tipo'];
+    $status = 'Falta Informacion';
     $claveGrupo = $_POST['claveGrupo'];
     $capacidad = $_POST['capacidad'];
     $costo = $_POST['costo'];
@@ -40,24 +40,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Insertar datos en la base de datos
-    $sql = "INSERT INTO curso (NombreCurso, DescripcionCurso, Modalidad, TipoSer, CostoCurso, ImagenCurso,  Status) 
-            VALUES ('$nombreCurso', '$descripcion', '$modalidad', '$tipo',  '$costo','$target_file', '$status')";
+    $sqlCurso = "INSERT INTO curso (NombreCurso, DescripcionCurso, Modalidad, TipoSer, CostoCurso, ImagenCurso, Status, FechaHoraC) 
+                 VALUES ('$nombreCurso', '$descripcion', '$modalidad', '$tipo', '$costo', '$target_file', '$status', NOW())";
 
-    $sql = "INSERT INTO grupo (ClaveGrupo, Capacidad, Costo, FechaHoraC, Status) 
-            VALUES ('$claveGrupo','$capacidad','$costo', NOW(),'$bstatus')"; 
+    if ($conn->query($sqlCurso) === TRUE) {
+        $cursoId = $conn->insert_id;  // Obtener el ID del curso insertado
 
-$sql = "INSERT INTO convocatoria (DocenteConvoca, FechaHoraC, Status) 
-            VALUES ('$docente', NOW(),'$bstatus')"; 
-    
- 
-    if ($conn->query($sql) === TRUE) {
-        $response["success"] = true;
-        
-        // Redirigir al usuario a "cursos.php" después de 5 segundos
-        header("Refresh: 5; url=cursos.php");
-        exit;
+        $sqlConvo = "INSERT INTO convocatoria (DocenteConvoca, FechaHoraC, Status) 
+                     VALUES ('$docente', NOW(), '$bstatus')";
+
+        $sqlGrupo = "INSERT INTO grupo (Fk_id_Curso, ClaveGrupo, Capacidad, Costo, FechaHoraC, Status) 
+                     VALUES ('$cursoId', '$claveGrupo', '$capacidad', '$costo', NOW(), '$bstatus')";
+
+        if ($conn->query($sqlConvo) === TRUE && $conn->query($sqlGrupo) === TRUE) {
+            $response["success"] = true;
+            // Redirigir al usuario a "cursos.php" después de 3 segundos
+            header("Refresh: 3; url=cursos.php");
+            exit;
+        } else {
+            $response["error"] = "Error: " . $conn->error;
+        }
     } else {
-        $response["error"] = "Error: " . $sql . "<br>" . $conn->error;
+        $response["error"] = "Error: " . $conn->error;
     }
 
     $conn->close();

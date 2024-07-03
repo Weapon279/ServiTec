@@ -1,11 +1,8 @@
 <?php include 'indexa.php'; ?>
 
-
-
 <?php
-session_start();
+
 require 'conexion.php';
-include '../modelo/sesion.php';
 
 
 // Verificar si el usuario está autenticado

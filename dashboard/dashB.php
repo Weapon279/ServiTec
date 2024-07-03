@@ -1,5 +1,4 @@
 <?php include 'indexa.php'; ?>
-<?php include '../modelo/sesion.php'; ?>
 
 
 <!DOCTYPE html>

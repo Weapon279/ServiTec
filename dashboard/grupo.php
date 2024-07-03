@@ -3,22 +3,20 @@ include 'indexa.php';
 include 'conexion.php';
 session_start();
 
-
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $alumno_id = $_POST['alumno_id'];
     $accion = $_POST['accion'];
 
     try {
         if ($accion == 'aceptar') {
-            // Cambiar el tipo de usuario a alumno (TypeUser = 2 en este ejemplo)
+            // Cambiar el tipo de usuario a alumno 
             $sql = "UPDATE alumnos a 
                     JOIN user u ON a.Fk_id_User = u.id_User 
                     SET a.Status = 1, u.Fk_TypeUser = 4 
                     WHERE a.id_Alumno = ?";
         } elseif ($accion == 'rechazar') {
-            // Actualizar el estado a rechazado (Status = 2 en este ejemplo)
-            $sql = "UPDATE alumnos SET Status = 1 WHERE id_Alumno = ?";
+            // Actualizar el estado a rechazado
+            $sql = "UPDATE alumnos SET Status = 0 WHERE id_Alumno = ?";
         }
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $alumno_id);
@@ -42,6 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <title>Grupos</title>
 </head>
+<div class="w3-main" style="margin-left:300px;margin-top:43px;">
+
 <body>
     <div class="container mt-5">
         <h1 class="text-center mb-4">Grupos</h1>
@@ -134,12 +134,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     echo "<ul>";
                     while ($application = $applicationsResult->fetch_assoc()) {
                         echo "<li>{$application['vNombre']}
-                              <form method='POST' action='aceptar_solicitud.php' style='display:inline;'>
+                              <form method='POST' action='' style='display:inline;'>
                                 <input type='hidden' name='alumno_id' value='{$application['id_Alumno']}'>
                                 <input type='hidden' name='accion' value='aceptar'>
                                 <button type='submit' class='btn btn-success'>Aceptar</button>
                               </form>
-                              <form method='POST' action='rechazar_solicitud.php' style='display:inline;'>
+                              <form method='POST' action='' style='display:inline;'>
                                 <input type='hidden' name='alumno_id' value='{$application['id_Alumno']}'>
                                 <input type='hidden' name='accion' value='rechazar'>
                                 <button type='submit' class='btn btn-danger'>Rechazar</button>

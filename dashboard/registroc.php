@@ -2,6 +2,9 @@
 include 'conexion.php';
 include 'indexa.php';
 
+// Suponiendo que $usuario_id está definido en 'indexa.php'
+// Si no es así, asegúrate de obtener el ID del usuario de la manera apropiada
+// Ejemplo: $usuario_id = $_SESSION['id_User'];
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['join_group'])) {
     $curso_id = $_POST['curso_id'];
@@ -17,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['join_group'])) {
         $stmt->execute();
 
         // Enviar una notificación al administrador
-        $mensaje = "Nuevo aspirante registrado para el curso ID: $curso_id en el grupo ID: $grupo_id";
+        $mensaje = "Nuevo aspirante registrado para el curso ID: $usuario_id en el grupo ID: $grupo_id";
         $tipo = "registro_grupo";
         $noti_sql = "INSERT INTO notificaciones (Tipo, Mensaje) VALUES (?, ?)";
         $noti_stmt = $conn->prepare($noti_sql);
@@ -82,9 +85,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['join_group'])) {
     text-decoration: none;
     cursor: pointer;
 }
-
 </style>
 <body>
+    <!-- Margen de tabla y menu lateral -->
+<div class="w3-main" style="margin-left:320px;margin-top:60px;">
+<!--Fin de margen -->
 <div class="container mt-5">
     <h1 class="text-center mb-4">Registro de Aspirantes</h1>
     <table class="table mt-5">
@@ -103,12 +108,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['join_group'])) {
             </tr>
         </thead>
         <tbody>
-            <?php
+        <?php
             $sql = "SELECT c.id_Curso, g.id_Grupo, c.NombreCurso, c.ObjectivoCurso, c.Modalidad, c.DescripcionCurso, c.CostoCurso, 
-                           g.FechaI, g.FechaF, g.Capacidad, g.Costo
+                        g.FechaI, g.FechaF, g.Capacidad, g.Costo
                     FROM curso c
                     JOIN grupo g ON c.id_Curso = g.Fk_id_Curso
-                    WHERE c.Status = 'Disponible'";
+                    WHERE c.Status IN ('Disponible', 'Falta Informacion')";
             $result = $conn->query($sql);
             while ($row = $result->fetch_assoc()) {
                 echo "<tr>
@@ -131,6 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['join_group'])) {
                     </tr>";
             }
             ?>
+
         </tbody>
     </table>
 </div>

@@ -4,28 +4,48 @@ include 'conexion.php';
 session_start();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $alumno_id = $_POST['alumno_id'];
+    $interes_id = $_POST['interes_id'];
     $accion = $_POST['accion'];
 
     try {
         if ($accion == 'aceptar') {
-            // Cambiar el tipo de usuario a alumno 
-            $sql = "UPDATE alumnos a 
-                    JOIN user u ON a.Fk_id_User = u.id_User 
-                    SET a.Status = 1, u.Fk_TypeUser = 4 
-                    WHERE a.id_Alumno = ?";
+            $sql = "DELETE FROM intereses WHERE id_Intereses = ?";
+            $conn->begin_transaction();
+
+            // Obtener los datos del interés
+            $sql = "SELECT Fk_id_User, Fk_id_Grupo FROM intereses WHERE id_Intereses = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("i", $interes_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $interes = $result->fetch_assoc();
+
+            // Insertar en la tabla alumnos
+            $sql = "INSERT INTO alumnos (Fk_id_User, Fk_Id_Grupo, Status, FechaHoraC) VALUES (?, ?, 1, NOW())";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("ii", $interes['Fk_id_User'], $interes['Fk_id_Grupo']);
+            $stmt->execute();
+
+            // Actualizar el estado del interés
+            $sql = "UPDATE intereses SET Status = 1 WHERE id_Intereses = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("i", $interes_id);
+            $stmt->execute();
+
+            $conn->commit();
         } elseif ($accion == 'rechazar') {
-            // Actualizar el estado a rechazado
-            $sql = "UPDATE alumnos SET Status = 0 WHERE id_Alumno = ?";
+            // Eliminar el interés rechazado de la tabla intereses
+            $sql = "DELETE FROM intereses WHERE id_Intereses = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("i", $interes_id);
+            $stmt->execute();
         }
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $alumno_id);
-        $stmt->execute();
 
         // Redirigir para evitar reenvío del formulario
         header("Location: grupo.php");
         exit();
     } catch (Exception $e) {
+        $conn->rollback();
         header("Location: error.php"); // Redirigir a la página de error en caso de fallo en la base de datos
         exit();
     }
@@ -41,12 +61,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Grupos</title>
 </head>
 <div class="w3-main" style="margin-left:300px;margin-top:43px;">
-
 <body>
     <div class="container mt-5">
         <h1 class="text-center mb-4">Grupos</h1>
         <?php
-        $sql = "SELECT g.id_Grupo, g.ClaveGrupo, g.Capacidad, g.FechaHoraC, g.FechaHoraA, c.NombreCurso 
+        $sql = "SELECT g.id_Grupo, g.ClaveGrupo, g.Capacidad, g.FechaI, g.FechaF, c.NombreCurso 
                 FROM grupo g
                 JOIN curso c ON g.Fk_id_Curso = c.id_Curso";
         $result = $conn->query($sql);
@@ -60,8 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <th>Capacidad</th>
                             <th>Fecha de Inicio</th>
                             <th>Fecha de Fin</th>
-                            <th>Ver Alumnos</th>
-                            <th>Ver Aspirantes</th>
+                            <th>Alumnos</th>
+                            <th>Aspirantes</th>
                         </tr>
                     </thead>
                     <tbody>";
@@ -72,8 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <td>{$row['ClaveGrupo']}</td>
                         <td>{$row['NombreCurso']}</td>
                         <td>{$row['Capacidad']}</td>
-                        <td>{$row['FechaHoraC']}</td>
-                        <td>{$row['FechaHoraA']}</td>
+                        <td>{$row['FechaI']}</td>
+                        <td>{$row['FechaF']}</td>
                         <td><button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#alumnosModal{$groupId}'>Ver Alumnos</button></td>
                         <td><button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#aspirantesModal{$groupId}'>Ver Aspirantes</button></td>
                       </tr>";
@@ -121,10 +140,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </div>
                             <div class='modal-body'>";
 
-                $applicationsSql = "SELECT u.vNombre, a.id_Alumno
-                                    FROM alumnos a
-                                    JOIN user u ON a.Fk_id_User = u.id_User
-                                    WHERE a.Fk_Id_Grupo = ? AND a.Status = 1";
+                $applicationsSql = "SELECT u.vNombre, i.id_Intereses
+                                    FROM intereses i
+                                    JOIN user u ON i.Fk_id_User = u.id_User
+                                    WHERE i.Fk_id_Grupo = ? AND i.Status = 1";
                 $stmt = $conn->prepare($applicationsSql);
                 $stmt->bind_param("i", $groupId);
                 $stmt->execute();
@@ -135,12 +154,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     while ($application = $applicationsResult->fetch_assoc()) {
                         echo "<li>{$application['vNombre']}
                               <form method='POST' action='' style='display:inline;'>
-                                <input type='hidden' name='alumno_id' value='{$application['id_Alumno']}'>
+                                <input type='hidden' name='interes_id' value='{$application['id_Intereses']}'>
                                 <input type='hidden' name='accion' value='aceptar'>
                                 <button type='submit' class='btn btn-success'>Aceptar</button>
                               </form>
                               <form method='POST' action='' style='display:inline;'>
-                                <input type='hidden' name='alumno_id' value='{$application['id_Alumno']}'>
+                                <input type='hidden' name='interes_id' value='{$application['id_Intereses']}'>
                                 <input type='hidden' name='accion' value='rechazar'>
                                 <button type='submit' class='btn btn-danger'>Rechazar</button>
                               </form>

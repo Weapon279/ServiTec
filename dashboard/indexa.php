@@ -10,6 +10,7 @@ if (!isset($_SESSION['userId'])) {
 
 $user_type_id = $_SESSION['userType'];
 $username = $_SESSION['username'];
+$usuario_id = $_SESSION['userId'];
 
 // Evitar que el usuario vuelva a la página anterior después de cerrar sesión
 header("Cache-Control: no-cache, no-store, must-revalidate");

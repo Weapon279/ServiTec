@@ -1,8 +1,8 @@
-<?php include 'indexb.php'; ?>
+<?php include '../indexa.php'; ?>
 
 <?php
 session_start();
-require 'conexion.php';
+require '../conexion.php';
 
 // Verificar si el usuario ha iniciado sesión
 if (!isset($_SESSION['userId'])) {

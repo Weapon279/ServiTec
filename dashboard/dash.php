@@ -4,7 +4,6 @@
 
 require 'conexion.php';
 
-
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['userId'])) {
     header("Location: ../login.php");
@@ -37,12 +36,15 @@ $resultUsuarios = $conn->query($queryUsuarios);
 $usuarios = $resultUsuarios->fetch_assoc()['total'];
 
 // Obtener los próximos cursos
-$sqlProximosCursos = "SELECT curso.id_Curso, curso.NombreCurso, curso.Modalidad, curso.FechaHoraC, curso.FechaHoraA, curso.Status FROM curso";
+$sqlProximosCursos = "SELECT id_Curso, NombreCurso, Modalidad, FechaHoraC, FechaHoraA, Status FROM curso";
 $resultProximosCursos = $conn->query($sqlProximosCursos);
 
-// Obtener cursos sin fecha
-$sqlCursosSinFecha = "SELECT NombreCurso, DescripcionCurso, DocenteConvoca, CostoCurso FROM curso LEFT JOIN convocatoria ON curso.Fk_id_ofer = convocatoria.Id_Convoca WHERE curso.FechaHoraC IS NULL";
-$resultCursosSinFecha = $conn->query($sqlCursosSinFecha);
+// Obtener cursos que ya se consideran vendidos (cuya fecha de finalización ya pasó)
+$sqlCursosVendidos = "SELECT g.id_Grupo, c.NombreCurso, c.Modalidad, g.FechaF
+                      FROM grupo g
+                      JOIN curso c ON g.Fk_id_Curso = c.id_Curso
+                      WHERE g.FechaF < NOW()";
+$resultCursosVendidos = $conn->query($sqlCursosVendidos);
 
 // Cerrar la conexión
 $conn->close();
@@ -152,28 +154,26 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
     </div>
     <!-- Fin Próximos cursos -->
 
-    <!-- Cursos sin fecha -->
+    <!-- Cursos vendidos -->
     <div class="col-md-12 mt-4">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Cursos Sin Fecha</h5>
+                <h5 class="card-title">Cursos Vendidos (Fecha de finalización pasada)</h5>
                 <table class="table table-striped">
                     <thead>
                         <tr>
                             <th>Nombre del Curso</th>
-                            <th>Descripción</th>
-                            <th>Docente</th>
-                            <th>Costo</th>
+                            <th>Modalidad</th>
+                            <th>Fecha de Finalización</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
-                        while($row = $resultCursosSinFecha->fetch_assoc()) {
+                        while($row = $resultCursosVendidos->fetch_assoc()) {
                             echo "<tr>
                                     <td>" . $row['NombreCurso'] . "</td>
-                                    <td>" . $row['DescripcionCurso'] . "</td>
-                                    <td>" . $row['DocenteConvoca'] . "</td>
-                                    <td>" . $row['CostoCurso'] . "</td>
+                                    <td>" . $row['Modalidad'] . "</td>
+                                    <td>" . $row['FechaF'] . "</td>
                                 </tr>";
                         }
                         ?>
@@ -182,7 +182,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
             </div>
         </div>
     </div>
-    <!-- Fin Cursos sin fecha -->
+    <!-- Fin Cursos vendidos -->
   </div>
 
 </div>

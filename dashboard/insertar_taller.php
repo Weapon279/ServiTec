@@ -40,25 +40,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Insertar datos en la base de datos
-    $sqlCurso = "INSERT INTO curso (NombreCurso, DescripcionCurso, Modalidad, TipoSer, CostoCurso, ImagenCurso, Status, FechaHoraC) 
-                 VALUES ('$nombreCurso', '$descripcion', '$modalidad', '$tipo', '$costo', '$target_file', '$status', NOW())";
+    // Primero, insertar en la tabla `convocatoria`
+    $sqlConvo = "INSERT INTO convocatoria (DocenteConvoca, FechaHoraC, Status) 
+                 VALUES ('$docente', NOW(), '$bstatus')";
 
-    if ($conn->query($sqlCurso) === TRUE) {
-        $cursoId = $conn->insert_id;  // Obtener el ID del curso insertado
+    if ($conn->query($sqlConvo) === TRUE) {
+        $convocatoriaId = $conn->insert_id; // Obtener el ID de la convocatoria insertada
+        
+        // Insertar en la tabla `oferta`
+        $sqlOferta = "INSERT INTO oferta (Fk_id_convoca, NombreOfer, Status, FechaHoraC, FechaHoraA) 
+                      VALUES ('$convocatoriaId', '$nombreCurso', '$bstatus', NOW(), NOW())";
+        
+        if ($conn->query($sqlOferta) === TRUE) {
+            $ofertaId = $conn->insert_id; // Obtener el ID de la oferta insertada
 
-        $sqlConvo = "INSERT INTO convocatoria (DocenteConvoca, FechaHoraC, Status) 
-                     VALUES ('$docente', NOW(), '$bstatus')";
+            // Insertar en la tabla `curso`
+            $sqlCurso = "INSERT INTO curso (Fk_id_ofer, NombreCurso, DescripcionCurso, Modalidad, TipoSer, CostoCurso, ImagenCurso, Status, FechaHoraC) 
+                         VALUES ('$ofertaId', '$nombreCurso', '$descripcion', '$modalidad', '$tipo', '$costo', '$target_file', '$status', NOW())";
 
-        $sqlGrupo = "INSERT INTO grupo (Fk_id_Curso, ClaveGrupo, Capacidad, Costo, FechaHoraC, Status) 
-                     VALUES ('$cursoId', '$claveGrupo', '$capacidad', '$costo', NOW(), '$bstatus')";
+            if ($conn->query($sqlCurso) === TRUE) {
+                $cursoId = $conn->insert_id;  // Obtener el ID del curso insertado
 
-                     
+                // Insertar en la tabla `grupo`
+                $sqlGrupo = "INSERT INTO grupo (Fk_id_Curso, ClaveGrupo, Capacidad, Costo, FechaHoraC, Status) 
+                             VALUES ('$cursoId', '$claveGrupo', '$capacidad', '$costo', NOW(), '$bstatus')";
 
-        if ($conn->query($sqlConvo) === TRUE && $conn->query($sqlGrupo) === TRUE) {
-            $response["success"] = true;
-            // Redirigir al usuario a "cursos.php" después de 3 segundos
-            header("Refresh: 3; url=cursos.php");
-            exit;
+                if ($conn->query($sqlGrupo) === TRUE) {
+                    $response["success"] = true;
+                    // Redirigir al usuario a "cursos.php" después de 3 segundos
+                    header("Refresh: 3; url=cursos.php");
+                    exit;
+                } else {
+                    $response["error"] = "Error: " . $conn->error;
+                }
+            } else {
+                $response["error"] = "Error: " . $conn->error;
+            }
         } else {
             $response["error"] = "Error: " . $conn->error;
         }

@@ -2,13 +2,13 @@
 
 <?php
 session_start();
-require 'modelo/conexion.php';
+require 'conexion.php';
 
 // Obtener el ID del usuario desde la sesión
 $userId = $_SESSION['userId'];
 
 // Consulta para obtener el curso actual del usuario
-$stmt = $pdo->prepare("
+$stmt = $conn->prepare("
     SELECT c.NombreCurso, c.DuracionCurso, c.FechaHoraA 
     FROM curso c 
     JOIN user u ON u.id_User = :userId
@@ -21,7 +21,7 @@ $stmt->execute();
 $cursoActual = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // Consulta para obtener los cursos de interés del usuario
-$stmt = $pdo->prepare("
+$stmt = $conn->prepare("
     SELECT c.NombreCurso 
     FROM curso c 
     WHERE c.Fk_id_ofer = (
@@ -37,7 +37,7 @@ $stmt->execute();
 $cursosInteres = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Consulta para obtener los próximos cursos
-$stmt = $pdo->prepare("
+$stmt = $conn->prepare("
     SELECT NombreCurso, FechaHoraC 
     FROM curso 
     WHERE Status = 1 

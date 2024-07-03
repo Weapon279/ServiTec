@@ -2,35 +2,32 @@
 include 'conexion.php';
 include 'indexa.php';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['join_group'])) {
     $curso_id = $_POST['curso_id'];
     $grupo_id = $_POST['grupo_id'];
-    $usuario_id = $_SESSION['id_User'];
 
-    // Iniciar una transacción
     $conn->begin_transaction();
 
     try {
-        // Insertar el interés del aspirante en la tabla intereses
+        // Insertar el interés del aspirante en la tabla intereses con Status activo
         $sql = "INSERT INTO intereses (Fk_id_User, Fk_id_Curso, Fk_id_Grupo, Status, FechaHoraC) VALUES (?, ?, ?, 1, NOW())";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("iii", $usuario_id, $curso_id, $grupo_id);
         $stmt->execute();
 
-        // Insertar al usuario en el grupo con estado activo en la tabla alumnos
-        $sql_alumno = "INSERT INTO alumnos (Fk_id_User, Fk_Id_Grupo, Status, FechaHoraC) VALUES (?, ?, 1, NOW())";
-        $stmt_alumno = $conn->prepare($sql_alumno);
-        $stmt_alumno->bind_param("ii", $usuario_id, $grupo_id);
-        $stmt_alumno->execute();
+        // Enviar una notificación al administrador
+        $mensaje = "Nuevo aspirante registrado para el curso ID: $curso_id en el grupo ID: $grupo_id";
+        $tipo = "registro_grupo";
+        $noti_sql = "INSERT INTO notificaciones (Tipo, Mensaje) VALUES (?, ?)";
+        $noti_stmt = $conn->prepare($noti_sql);
+        $noti_stmt->bind_param("ss", $tipo, $mensaje);
+        $noti_stmt->execute();
 
-        // Confirmar la transacción
         $conn->commit();
-
-        echo "Interés registrado con éxito";
-        header("Location: registroc.php");
-        exit();
+        // Marcamos que se debe mostrar el modal
+        $mostrarModal = true;
     } catch (Exception $e) {
-        // En caso de error, revertir la transacción
         $conn->rollback();
         echo "Error al registrar el interés: " . $e->getMessage();
     }
@@ -43,57 +40,135 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <title>Registro de Aspirantes</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-<body>
-<div class="w3-main" style="margin-left:300px;margin-top:43px;">
-    <div class="container mt-5">
-        <h1 class="text-center mb-4">Registro de Aspirantes</h1>
-        <form method="POST" action="registroc.php">
-            <div class="mb-3">
-                <label for="curso_id" class="form-label">Seleccione el Curso</label>
-                <select id="curso_id" name="curso_id" class="form-select" required>
-                    <option value="">Seleccione un curso</option>
-                    <?php
-                    $sql = "SELECT id_Curso, NombreCurso FROM curso WHERE Status = 'Disponible'";
-                    $result = $conn->query($sql);
-                    while ($row = $result->fetch_assoc()) {
-                        echo "<option value='{$row['id_Curso']}'>{$row['NombreCurso']}</option>";
-                    }
-                    ?>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="grupo_id" class="form-label">Seleccione el Grupo</label>
-                <select id="grupo_id" name="grupo_id" class="form-select" required>
-                    <option value="">Seleccione un grupo</option>
-                    <!-- Los grupos se llenarán dinámicamente usando JavaScript -->
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Registrar Interés</button>
-        </form>
-    </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.getElementById('curso_id').addEventListener('change', function() {
-    var cursoId = this.value;
-    var grupoSelect = document.getElementById('grupo_id');
-    grupoSelect.innerHTML = '<option value="">Seleccione un grupo</option>'; // Limpiar las opciones previas
+<style>
+/* Estilo para el modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+    padding-top: 60px;
+}
 
-    if (cursoId) {
-        fetch('obtener_grupos.php?curso_id=' + cursoId)
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(grupo => {
-                    var option = document.createElement('option');
-                    option.value = grupo.id_Grupo;
-                    option.textContent = grupo.ClaveGrupo;
-                    grupoSelect.appendChild(option);
-                });
-            })
-            .catch(error => console.error('Error al obtener los grupos:', error));
-    }
-});
-</script>
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+</style>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Registro de Aspirantes</h1>
+    <table class="table mt-5">
+        <thead>
+            <tr>
+                <th>Nombre Curso</th>
+                <th>Objectivo Curso</th>
+                <th>Modalidad</th>
+                <th>Descripción Curso</th>
+                <th>Costo Curso</th>
+                <th>Fecha Inicio Grupo</th>
+                <th>Fecha Fin Grupo</th>
+                <th>Capacidad del Grupo</th>
+                <th>Costo del Grupo</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            $sql = "SELECT c.id_Curso, g.id_Grupo, c.NombreCurso, c.ObjectivoCurso, c.Modalidad, c.DescripcionCurso, c.CostoCurso, 
+                           g.FechaI, g.FechaF, g.Capacidad, g.Costo
+                    FROM curso c
+                    JOIN grupo g ON c.id_Curso = g.Fk_id_Curso
+                    WHERE c.Status = 'Disponible'";
+            $result = $conn->query($sql);
+            while ($row = $result->fetch_assoc()) {
+                echo "<tr>
+                        <td>{$row['NombreCurso']}</td>
+                        <td>{$row['ObjectivoCurso']}</td>
+                        <td>{$row['Modalidad']}</td>
+                        <td>{$row['DescripcionCurso']}</td>
+                        <td>{$row['CostoCurso']}</td>
+                        <td>{$row['FechaI']}</td>
+                        <td>{$row['FechaF']}</td>
+                        <td>{$row['Capacidad']}</td>
+                        <td>{$row['Costo']}</td>
+                        <td>
+                            <form method='POST' action='registroc.php'>
+                                <input type='hidden' name='curso_id' value='{$row['id_Curso']}'>
+                                <input type='hidden' name='grupo_id' value='{$row['id_Grupo']}'>
+                                <button type='submit' name='join_group' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#modal'>Unirse al Grupo</button>
+                            </form>
+                        </td>
+                    </tr>";
+            }
+            ?>
+        </tbody>
+    </table>
+</div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>Usuario registrado con éxito. Inicia sesión</p>
+        </div>
+    </div>
+
+    <script>
+        // Script para cerrar el modal y redirigir después de 2 segundos
+        document.addEventListener('DOMContentLoaded', function() {
+            var modal = document.getElementById('modal');
+            var span = document.getElementsByClassName('close')[0];
+
+            if (modal.style.display == 'block') {
+                setTimeout(function() {
+                    modal.style.display = 'none';
+                    window.location.href = 'login.php';
+                }, 10000);
+            }
+
+            // Cuando el usuario hace clic en <span> (x), cierra el modal
+            span.onclick = function() {
+                modal.style.display = 'none';
+            }
+
+            // Cuando el usuario hace clic fuera del modal, lo cierra
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            }
+        });
+    </script>
+
 </body>
 </html>

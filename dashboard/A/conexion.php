@@ -1,7 +1,7 @@
 <?php
 $host = 'localhost';
 $db = 'cursos';
-$user = 'Admin';
+$user = 'root';
 $pass = '';
 
 try {

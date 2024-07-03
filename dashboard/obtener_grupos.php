@@ -4,7 +4,9 @@ include 'conexion.php';
 if (isset($_GET['curso_id'])) {
     $curso_id = $_GET['curso_id'];
 
-    $sql = "SELECT id_Grupo, ClaveGrupo FROM grupo WHERE Fk_id_Curso = ?";
+    $sql = "SELECT id_Grupo, ClaveGrupo, FechaI, FechaF, Capacidad, Costo 
+            FROM grupo 
+            WHERE Fk_id_Curso = ? AND Status = 1";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $curso_id);
     $stmt->execute();

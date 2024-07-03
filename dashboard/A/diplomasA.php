@@ -14,7 +14,7 @@ if (!isset($_SESSION['userId'])) {
 $userId = $_SESSION['userId'];
 
 // Consulta para obtener los diplomas del usuario
-$stmt = $pdo->prepare("
+$stmt = $conn->prepare("
     SELECT NombreDiploma, LinkDiploma, FechaHoraC 
     FROM diplomas 
     WHERE Fk_id_user = :userId

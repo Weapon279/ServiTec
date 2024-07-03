@@ -1,7 +1,6 @@
 <?php
 require 'modelo/conexion.php';
 
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $vCorreo = $_POST['vCorreo'];
     $nPass = password_hash($_POST['nPass'], PASSWORD_DEFAULT); 
@@ -9,7 +8,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $vApellidoP = $_POST['vApellidoP'];
     $vApellidoM = $_POST['vApellidoM'];
     $nWhats = $_POST['nWhats'];
-    $Fk_TypeUser = 4;
+    $Fk_TypeUser = 1;
     $bStatus = 'Activo'; 
 
     if (!is_numeric($nWhats) || $nWhats < 0 || $nWhats > 9223372036854775807) {
@@ -18,18 +17,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     try {
-        $stmt = $conn->prepare("INSERT INTO user (vCorreo, nPass, vNombre, vApellidoP, vApellidoM, nWhats, Fk_TypeUser, bStatus, iFechaHoraC, iFechaHoraA) VALUES (:vCorreo, :nPass, :vNombre, :vApellidoP, :vApellidoM, :nWhats, :Fk_TypeUser, :bStatus, NOW(), NOW())");
+        $conn->beginTransaction(); // Inicia una transacción
         
-        $stmt->bindParam(':vCorreo', $vCorreo);
-        $stmt->bindParam(':nPass', $nPass);
-        $stmt->bindParam(':vNombre', $vNombre);
-        $stmt->bindParam(':vApellidoP', $vApellidoP);
-        $stmt->bindParam(':vApellidoM', $vApellidoM);
-        $stmt->bindParam(':nWhats', $nWhats, PDO::PARAM_INT); 
-        $stmt->bindParam(':Fk_TypeUser', $Fk_TypeUser, PDO::PARAM_INT);
-        $stmt->bindParam(':bStatus', $bStatus);
+        // Insertar usuario en la tabla user
+        $stmt_user = $conn->prepare("INSERT INTO user (vCorreo, nPass, vNombre, vApellidoP, vApellidoM, nWhats, Fk_TypeUser, bStatus, iFechaHoraC, iFechaHoraA) VALUES (:vCorreo, :nPass, :vNombre, :vApellidoP, :vApellidoM, :nWhats, :Fk_TypeUser, :bStatus, NOW(), NOW())");
+        
+        $stmt_user->bindParam(':vCorreo', $vCorreo);
+        $stmt_user->bindParam(':nPass', $nPass);
+        $stmt_user->bindParam(':vNombre', $vNombre);
+        $stmt_user->bindParam(':vApellidoP', $vApellidoP);
+        $stmt_user->bindParam(':vApellidoM', $vApellidoM);
+        $stmt_user->bindParam(':nWhats', $nWhats, PDO::PARAM_INT); 
+        $stmt_user->bindParam(':Fk_TypeUser', $Fk_TypeUser, PDO::PARAM_INT);
+        $stmt_user->bindParam(':bStatus', $bStatus);
 
-        if ($stmt->execute()) {
+        if ($stmt_user->execute()) {
+            // Obtener el ID del usuario insertado
+            $Fk_id_User = $conn->lastInsertId();
+            
+            // Insertar en la tabla alumnos
+            $stmt_alumno = $conn->prepare("INSERT INTO alumnos (Fk_id_User, Status, FechaHoraC, FechaHoraA) VALUES (:Fk_id_User, 1, NOW(), NOW())");
+            $stmt_alumno->bindParam(':Fk_id_User', $Fk_id_User, PDO::PARAM_INT);
+            $stmt_alumno->execute();
+            
+            $conn->commit(); // Confirmar la transacción
+
             echo "<script>
                     document.addEventListener('DOMContentLoaded', function() {
                         document.getElementById('modal').style.display = 'block';
@@ -39,7 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     });
                   </script>";
             
-            //notificación para el administrador
+            // Notificación para el administrador
             $mensaje = "Nuevo usuario registrado: {$vNombre} {$vApellidoP}";
             $tipo = "registro_usuario";
 
@@ -52,10 +64,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "Error al registrar el usuario.";
         }
     } catch (PDOException $e) {
+        $conn->rollBack(); // Revertir la transacción en caso de error
         echo "Error: " . $e->getMessage();
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">

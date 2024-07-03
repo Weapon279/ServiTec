@@ -52,6 +52,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $sqlGrupo = "INSERT INTO grupo (Fk_id_Curso, ClaveGrupo, Capacidad, Costo, FechaHoraC, Status) 
                      VALUES ('$cursoId', '$claveGrupo', '$capacidad', '$costo', NOW(), '$bstatus')";
 
+                     
+
         if ($conn->query($sqlConvo) === TRUE && $conn->query($sqlGrupo) === TRUE) {
             $response["success"] = true;
             // Redirigir al usuario a "cursos.php" después de 3 segundos

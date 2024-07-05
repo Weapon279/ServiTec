@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['join_group'])) {
         $stmt->execute();
 
         // Enviar una notificación al administrador
-        $mensaje = "Nuevo aspirante registrado para el curso ID: $usuario_id en el grupo ID: $grupo_id";
+        $mensaje = "Nuevo aspirante registrado para el curso ID: $username en el grupo ID: $grupo_id";
         $tipo = "registro_grupo";
         $noti_sql = "INSERT INTO notificaciones (Tipo, Mensaje) VALUES (?, ?)";
         $noti_stmt = $conn->prepare($noti_sql);

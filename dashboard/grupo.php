@@ -3,13 +3,14 @@ include 'indexa.php';
 include 'conexion.php';
 session_start();
 
+$error_message = '';
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $interes_id = $_POST['interes_id'];
     $accion = $_POST['accion'];
 
     try {
         if ($accion == 'aceptar') {
-            $sql = "DELETE FROM intereses WHERE id_Intereses = ?";
             $conn->begin_transaction();
 
             // Obtener los datos del interés
@@ -20,19 +21,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $result = $stmt->get_result();
             $interes = $result->fetch_assoc();
 
-            // Insertar en la tabla alumnos
-            $sql = "INSERT INTO alumnos (Fk_id_User, Fk_Id_Grupo, Status, FechaHoraC) VALUES (?, ?, 1, NOW())";
+            // Verificar si el usuario ya está registrado en el grupo
+            $sql = "SELECT * FROM alumnos WHERE Fk_id_User = ? AND Fk_Id_Grupo = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("ii", $interes['Fk_id_User'], $interes['Fk_id_Grupo']);
             $stmt->execute();
+            $result = $stmt->get_result();
 
-            // Actualizar el estado del interés
-            $sql = "UPDATE intereses SET Status = 1 WHERE id_Intereses = ?";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("i", $interes_id);
-            $stmt->execute();
+            if ($result->num_rows > 0) {
+                // El usuario ya está registrado en el grupo
+                throw new Exception('El usuario ya está registrado en este grupo.');
+            } else {
+                // Insertar en la tabla alumnos
+                $sql = "INSERT INTO alumnos (Fk_id_User, Fk_Id_Grupo, Status, FechaHoraC) VALUES (?, ?, 1, NOW())";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("ii", $interes['Fk_id_User'], $interes['Fk_id_Grupo']);
+                $stmt->execute();
 
-            $conn->commit();
+                // Actualizar el estado del interés
+                $sql = "UPDATE intereses SET Status = 1 WHERE id_Intereses = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $interes_id);
+                $stmt->execute();
+
+                $conn->commit();
+            }
         } elseif ($accion == 'rechazar') {
             // Eliminar el interés rechazado de la tabla intereses
             $sql = "DELETE FROM intereses WHERE id_Intereses = ?";
@@ -46,8 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit();
     } catch (Exception $e) {
         $conn->rollback();
-        header("Location: error.php"); // Redirigir a la página de error en caso de fallo en la base de datos
-        exit();
+        $error_message = $e->getMessage();
     }
 }
 ?>
@@ -60,11 +72,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <title>Grupos</title>
 </head>
-<div class="w3-main" style="margin-left:300px;margin-top:43px;">
 <body>
+<div class="w3-main" style="margin-left:300px;margin-top:43px;">
     <div class="container mt-5">
         <h1 class="text-center mb-4">Grupos</h1>
         <?php
+        if (!empty($error_message)) {
+            echo "<div class='modal fade' id='errorModal' tabindex='-1' aria-labelledby='errorModalLabel' aria-hidden='true'>
+                    <div class='modal-dialog'>
+                      <div class='modal-content'>
+                        <div class='modal-header'>
+                          <h5 class='modal-title' id='errorModalLabel'>Error</h5>
+                          <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+                        </div>
+                        <div class='modal-body'>
+                          <p>{$error_message}</p>
+                        </div>
+                        <div class='modal-footer'>
+                          <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Cerrar</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>";
+            echo "<script>
+                    var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                    errorModal.show();
+                  </script>";
+        }
+        
         $sql = "SELECT g.id_Grupo, g.ClaveGrupo, g.Capacidad, g.FechaI, g.FechaF, c.NombreCurso 
                 FROM grupo g
                 JOIN curso c ON g.Fk_id_Curso = c.id_Curso";

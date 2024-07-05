@@ -486,7 +486,6 @@ body {
       <img src="<?php echo htmlspecialchars($curso['ImagenCurso'] ?? 'default.webp ,default.webp default,jpg'); ?>" alt="<?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?>" style="width:100%">        <div class="w3-card">
           <div class="w3-container">
             <h3><?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?></h3>
-            <p class="w3-opacity"><?php echo htmlspecialchars($curso['NombreOfer'] ?? ''); ?></p>
             <p><?php echo htmlspecialchars($curso['DescripcionCurso'] ?? ''); ?></p>
             <p>Docente: <?php echo htmlspecialchars($curso['NombreDoc'] ?? ''); ?></p>
             <p>Fecha Inicio: <?php echo htmlspecialchars($curso['FechaHoraC'] ?? ''); ?></p>
@@ -539,7 +538,6 @@ body {
       <img src="<?php echo htmlspecialchars($curso['ImagenCurso'] ?? 'default.jpg'); ?>" alt="<?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?>" style="width:100%">        <div class="w3-card">
           <div class="w3-container">
             <h3><?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?></h3>
-            <p class="w3-opacity"><?php echo htmlspecialchars($curso['NombreOfer'] ?? ''); ?></p>
             <p><?php echo htmlspecialchars($curso['DescripcionCurso'] ?? ''); ?></p>
             <p>Docente: <?php echo htmlspecialchars($curso['NombreDoc'] ?? ''); ?></p>
             <p>Modalidad: <?php echo htmlspecialchars($curso['Modalidad'] ?? ''); ?></p>

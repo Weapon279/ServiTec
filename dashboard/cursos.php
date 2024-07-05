@@ -67,12 +67,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Lanzar curso
                 $fechaInicio = $_POST['fechaInicio'];
                 $fechaFin = $_POST['fechaFin'];
-                $sql = "UPDATE curso SET FechaHoraC = '$fechaInicio', FechaHoraA = '$fechaFin', Status = 'Disponible' WHERE id_Curso = $courseId";
+                $id_curso = $_POST['id_Curso'];
+                $sql = "UPDATE curso SET Status = 'Disponible' WHERE id_Curso = $courseId";
+                $conn->query($sql);
                 $conn->query($sql);
                 break;
         }
 
-        // Actualizar el estado del curso según la lógica de negocio
+        // Actualizar el estado del curso según sea necesario
         $capacidadSql = "SELECT Capacidad FROM grupo WHERE Fk_id_Curso = $courseId";
         $capacidadResult = $conn->query($capacidadSql);
         $capacidadRow = $capacidadResult->fetch_assoc();
@@ -90,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($fechaInicio) && empty($fechaFin)) {
             $status = 'Falta Informacion';
-        } elseif ($alumnosRegistrados < ($capacidadMaxima / 25)) {
+        } elseif ($alumnosRegistrados < ($capacidadMaxima / 2)) {
             $status = 'Suspender';
         }
 
@@ -270,16 +272,6 @@ $result = $conn->query($sql);
 $result->data_seek(0);
 while($row = $result->fetch_assoc()) {
   $courseId = $row['id_Curso'];
-  $studentsSql = "SELECT user.vNombre FROM grupo 
-                  JOIN alumnos ON grupo.Fk_id_Alumno = alumnos.id_Alumno
-                  JOIN user ON alumnos.Fk_id_User = user.id_User
-                  WHERE grupo.Fk_id_Curso = $courseId";
-  $studentsResult = $conn->query($studentsSql);
-  $students = [];
-  while($student = $studentsResult->fetch_assoc()) {
-    $students[] = $student['vNombre'];
-  }
-  $studentsList = implode(", ", $students);
 
   // Modal para ver alumnos registrados
   echo "<div class='modal fade' id='alumnosModal{$courseId}' tabindex='-1' aria-labelledby='alumnosModalLabel' aria-hidden='true'>
@@ -290,14 +282,11 @@ while($row = $result->fetch_assoc()) {
                 <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
               </div>
               <div class='modal-body'>
-                <p>{$studentsList}</p>
-                <p>No hay Alumnos Registrados</p>
+                <p>Contenido del modal para mostrar alumnos registrados...</p>
               </div>
             </div>
           </div>
         </div>";
-}
-?>
 
   // Modal para lanzar curso
   echo "<div class='modal fade' id='actividadModal{$courseId}' tabindex='-1' aria-labelledby='actividadModalLabel' aria-hidden='true'>

@@ -2,7 +2,6 @@
 include 'conexion.php';
 include 'indexa.php';
 
-session_start();
 ?>
 
 <!DOCTYPE html>

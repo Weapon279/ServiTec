@@ -42,6 +42,7 @@ function generateMenu($user_type_id, $conn) {
             $menu .= "<li class='nav-item'><a href='cursos.php' class='nav-link'><i class='fas fa-users'></i> Servicios</a></li>";
             $menu .= "<li class='nav-item'><a href='grupo.php' class='nav-link'><i class='fas fa-users'></i> Gestion de grupos</a></li>";
             $menu .= "<li class='nav-item'><a href='registro_taller.php' class='nav-link'><i class='fas fa-users'></i> Registro de Servicio</a></li>";
+            $menu .= "<li class='nav-item'><a href='noticia.php' class='nav-link'><i class='fas fa-users'></i> Noticias</a></li>";
             $menu .= "<li class='nav-item'><a href='alumnos.php' class='nav-link'><i class='fas fa-users'></i> Alumnos</a></li>";
             $menu .= "<li class='nav-item'><a href='diplomas.php' class='nav-link'><i class='fas fa-users'></i> Diplomas</a></li>";
             break;

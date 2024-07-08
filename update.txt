@@ -1,0 +1,49 @@
+*Gestion de servicios*
+Actualizacion de curso se asignarios varias operaciones, para que solo aparescan los cursos
+
+Se modifico la base de datos para separar la logica
+
+El boton de lanzar cada uqe se genera una fehca se lanza un nuevo grupo 
+-Falta reacomodar la logica para el status del servicio
+
+
+Falta
+-Retirar de la tabla informacion
+-Agregar a la tabla toda la informacion del servicios
+
+*Grupo*
+El grupo se podra vizualizar la gente que esta interesa en un curso 
+Una vez que el admin acepte al alumno el alumno no podra volver a registrarse al mismo grupo
+
+El grupo podra ver cuantos alumnos tienes reigstrados y con el cupo limitado
+
+
+
+Falta
+-Mejorar la tabla
+-Agregar tablas de cursos (Grupos) finalizados con el fin de tener un registro 
+
+
+*Noticias*
+Se agregue una sesioncion de noticias donde aprece en la pagina principal cada que se modifica se modificara en la pagina principal
+
+Falta por agregar
+Mejora en el inicio del alumno
+
+*Registro de Servicio*
+El registro creara una convocatoria, oferta y servicio, con esto el aspirante podra obtar por obtener una oferta
+
+*Dashboard admin*
+Falta acomodar la logica de los cursos vendidos
+
+*Pagina principal*
+Falta realizar la logica para que parescan los cursos 
+
+*General*
+Modificar iconos
+
+*Notifiaciones*
+Bloquear notiifaciones para el tipo de usuario
+
+*Diplomas*
+Falta agregar diplomas para los grupos finalizados

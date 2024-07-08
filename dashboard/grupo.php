@@ -5,9 +5,15 @@ session_start();
 
 $error_message = '';
 
+// Configuración de paginación
+$limit = 10; // Número de registros por página
+$page = isset($_GET['page']) ? $_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $interes_id = $_POST['interes_id'];
-    $accion = $_POST['accion'];
+    // Verifica si la clave 'interes_id' está definida en $_POST
+    $interes_id = isset($_POST['interes_id']) ? $_POST['interes_id'] : null;
+    $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
 
     try {
         if ($accion == 'aceptar') {
@@ -22,39 +28,91 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $interes = $result->fetch_assoc();
 
             // Verificar si el usuario ya está registrado en el grupo
-            $sql = "SELECT * FROM alumnos WHERE Fk_id_User = ? AND Fk_Id_Grupo = ?";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ii", $interes['Fk_id_User'], $interes['Fk_id_Grupo']);
-            $stmt->execute();
-            $result = $stmt->get_result();
+            $sql_check = "SELECT * FROM alumnos WHERE Fk_id_User = ? AND Fk_Id_Grupo = ?";
+            $stmt_check = $conn->prepare($sql_check);
+            $stmt_check->bind_param("ii", $interes['Fk_id_User'], $interes['Fk_id_Grupo']);
+            $stmt_check->execute();
+            $result_check = $stmt_check->get_result();
 
-            if ($result->num_rows > 0) {
-                // El usuario ya está registrado en el grupo
+            if ($result_check->num_rows > 0) {
                 throw new Exception('El usuario ya está registrado en este grupo.');
             } else {
                 // Insertar en la tabla alumnos
-                $sql = "INSERT INTO alumnos (Fk_id_User, Fk_Id_Grupo, Status, FechaHoraC) VALUES (?, ?, 1, NOW())";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("ii", $interes['Fk_id_User'], $interes['Fk_id_Grupo']);
-                $stmt->execute();
+                $sql_insert_alumnos = "INSERT INTO alumnos (Fk_id_User, Fk_Id_Grupo, Status, FechaHoraC) VALUES (?, ?, 1, NOW())";
+                $stmt_insert_alumnos = $conn->prepare($sql_insert_alumnos);
+                $stmt_insert_alumnos->bind_param("ii", $interes['Fk_id_User'], $interes['Fk_id_Grupo']);
+                $stmt_insert_alumnos->execute();
+
+                // Insertar en la tabla inscripciones
+                $sql_insert_inscripciones = "INSERT INTO inscripciones (Fk_id_User, Fk_id_Grupo, FechaHoraC) VALUES (?, ?, NOW())";
+                $stmt_insert_inscripciones = $conn->prepare($sql_insert_inscripciones);
+                $stmt_insert_inscripciones->bind_param("ii", $interes['Fk_id_User'], $interes['Fk_id_Grupo']);
+                $stmt_insert_inscripciones->execute();
 
                 // Actualizar el estado del interés
-                $sql = "UPDATE intereses SET Status = 1 WHERE id_Intereses = ?";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("i", $interes_id);
-                $stmt->execute();
+                $sql_update_intereses = "UPDATE intereses SET Status = 1 WHERE id_Intereses = ?";
+                $stmt_update_intereses = $conn->prepare($sql_update_intereses);
+                $stmt_update_intereses->bind_param("i", $interes_id);
+                $stmt_update_intereses->execute();
 
                 $conn->commit();
             }
         } elseif ($accion == 'rechazar') {
-            // Eliminar el interés rechazado de la tabla intereses
-            $sql = "DELETE FROM intereses WHERE id_Intereses = ?";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("i", $interes_id);
-            $stmt->execute();
+            // Actualizar el estado del interés
+            $sql_update_intereses = "UPDATE intereses SET Status = 2 WHERE id_Intereses = ?";
+            $stmt_update_intereses = $conn->prepare($sql_update_intereses);
+            $stmt_update_intereses->bind_param("i", $interes_id);
+            $stmt_update_intereses->execute();
+        } elseif ($accion == 'finalizar') {
+            $grupo_id = isset($_POST['grupo_id']) ? $_POST['grupo_id'] : null;
+
+            if (!$grupo_id) {
+                throw new Exception('ID de grupo no válido.');
+            }
+
+            // Verificar si hay registros relacionados en grupos_finalizados
+            $sql_check_finalizados = "SELECT COUNT(*) as total FROM grupos_finalizados WHERE Fk_id_Grupo = ?";
+            $stmt_check_finalizados = $conn->prepare($sql_check_finalizados);
+            $stmt_check_finalizados->bind_param("i", $grupo_id);
+            $stmt_check_finalizados->execute();
+            $result_check_finalizados = $stmt_check_finalizados->get_result();
+            $row_check_finalizados = $result_check_finalizados->fetch_assoc();
+
+            if ($row_check_finalizados['total'] > 0) {
+                throw new Exception('No se puede eliminar el grupo porque tiene registros relacionados en grupos_finalizados.');
+            }
+
+            // Mover grupo a la tabla grupos_finalizados
+            $sql_move_to_finalizados = "INSERT INTO grupos_finalizados (Fk_id_Curso, Fk_id_Grupo, NombreCurso, FechaInicio, FechaFin, Capacidad, Cupo, ClaveGrupo)
+                    SELECT Fk_id_Curso, id_Grupo, c.NombreCurso, FechaI, FechaF, Capacidad, (SELECT COUNT(*) FROM alumnos WHERE Fk_Id_Grupo = g.id_Grupo), ClaveGrupo
+                    FROM grupo g
+                    JOIN curso c ON g.Fk_id_Curso = c.id_Curso
+                    WHERE g.id_Grupo = ?";
+            $stmt_move_to_finalizados = $conn->prepare($sql_move_to_finalizados);
+            $stmt_move_to_finalizados->bind_param("i", $grupo_id);
+            $stmt_move_to_finalizados->execute();
+
+            // Borrar el grupo de la tabla grupo
+            $sql_delete_grupo = "DELETE FROM grupo WHERE id_Grupo = ?";
+            $stmt_delete_grupo = $conn->prepare($sql_delete_grupo);
+            $stmt_delete_grupo->bind_param("i", $grupo_id);
+            $stmt_delete_grupo->execute();
+
+            $conn->commit();
+        } elseif ($accion == 'cancelar') {
+            $grupo_id = isset($_POST['grupo_id']) ? $_POST['grupo_id'] : null;
+
+            if (!$grupo_id) {
+                throw new Exception('ID de grupo no válido.');
+            }
+
+            // Actualizar el estado del grupo a inactivo
+            $sql_update_grupo = "UPDATE grupo SET Status = 0 WHERE id_Grupo = ?";
+            $stmt_update_grupo = $conn->prepare($sql_update_grupo);
+            $stmt_update_grupo->bind_param("i", $grupo_id);
+            $stmt_update_grupo->execute();
         }
 
-        // Redirigir para evitar reenvío del formulario
         header("Location: grupo.php");
         exit();
     } catch (Exception $e) {
@@ -62,7 +120,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $error_message = $e->getMessage();
     }
 }
+
+function getGroupLetter($id) {
+    $letters = '';
+    while ($id > 0) {
+        $mod = ($id - 1) % 26;
+        $letters = chr(65 + $mod) . $letters;
+        $id = (int)(($id - $mod) / 26);
+    }
+    return $letters;
+}
+
+function getGroupNumber($id) {
+    return $id;
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -100,9 +173,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                   </script>";
         }
         
+        // Consulta para obtener los grupos con paginación
         $sql = "SELECT g.id_Grupo, g.ClaveGrupo, g.Capacidad, g.FechaI, g.FechaF, c.NombreCurso 
                 FROM grupo g
-                JOIN curso c ON g.Fk_id_Curso = c.id_Curso";
+                JOIN curso c ON g.Fk_id_Curso = c.id_Curso
+                LIMIT $limit OFFSET $offset";
         $result = $conn->query($sql);
 
         if ($result->num_rows > 0) {
@@ -116,20 +191,48 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <th>Fecha de Fin</th>
                             <th>Alumnos</th>
                             <th>Aspirantes</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>";
 
             while ($row = $result->fetch_assoc()) {
                 $groupId = $row['id_Grupo'];
+                $groupLetter = getGroupLetter($groupId);
+                $groupNumber = getGroupNumber($groupId);
+
+                // Contar el número de alumnos en el grupo
+                $sqlCount = "SELECT COUNT(*) as count FROM alumnos WHERE Fk_Id_Grupo = ?";
+                $stmtCount = $conn->prepare($sqlCount);
+                $stmtCount->bind_param("i", $groupId);
+                $stmtCount->execute();
+                $resultCount = $stmtCount->get_result();
+                $count = $resultCount->fetch_assoc()['count'];
+
                 echo "<tr>
-                        <td>{$row['ClaveGrupo']}</td>
+                        <td>{$groupNumber} ({$groupLetter})</td>
                         <td>{$row['NombreCurso']}</td>
-                        <td>{$row['Capacidad']}</td>
+                        <td>{$count}/{$row['Capacidad']}</td>
                         <td>{$row['FechaI']}</td>
                         <td>{$row['FechaF']}</td>
                         <td><button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#alumnosModal{$groupId}'>Ver Alumnos</button></td>
                         <td><button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#aspirantesModal{$groupId}'>Ver Aspirantes</button></td>
+                        <td>
+                            <button type='button' class='btn btn-warning' data-bs-toggle='modal' data-bs-target='#editarModal{$groupId}'>Editar</button>
+                            <button type='button' class='btn btn-success' data-bs-toggle='modal' data-bs-target='#diplomaModal{$groupId}'>Agregar Diploma</button>
+                                                    <form action='grupo.php' method='post' style='display:inline-block;'>
+                                <input type='hidden' name='accion' value='finalizar'>
+                                <input type='hidden' name='grupo_id' value='{$groupId}'>
+                                <button type='submit' class='btn btn-success'>Finalizar Grupo</button>
+                            </form>
+                            <form action='grupo.php' method='post' style='display:inline-block;'>
+                                <input type='hidden' name='accion' value='cancelar'>
+                                <input type='hidden' name='grupo_id' value='{$groupId}'>
+                                <button type='submit' class='btn btn-danger'>Cancelar Grupo</button>
+                            </form>
+                                                    </td>
+
+                        
                       </tr>";
 
                 // Modal para mostrar los alumnos del grupo
@@ -137,7 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <div class='modal-dialog'>
                           <div class='modal-content'>
                             <div class='modal-header'>
-                              <h5 class='modal-title' id='alumnosModalLabel{$groupId}'>Alumnos del Grupo {$row['ClaveGrupo']}</h5>
+                              <h5 class='modal-title' id='alumnosModalLabel{$groupId}'>Alumnos del Grupo {$groupLetter}</h5>
                               <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
                             </div>
                             <div class='modal-body'>";
@@ -170,7 +273,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <div class='modal-dialog'>
                           <div class='modal-content'>
                             <div class='modal-header'>
-                              <h5 class='modal-title' id='aspirantesModalLabel{$groupId}'>Solicitudes para el Grupo {$row['ClaveGrupo']}</h5>
+                              <h5 class='modal-title' id='aspirantesModalLabel{$groupId}'>Solicitudes para el Grupo {$groupLetter}</h5>
                               <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
                             </div>
                             <div class='modal-body'>";
@@ -208,10 +311,118 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                           </div>
                         </div>
                       </div>";
+
+                // Modal para editar la información del grupo
+                echo "<div class='modal fade' id='editarModal{$groupId}' tabindex='-1' aria-labelledby='editarModalLabel{$groupId}' aria-hidden='true'>
+                        <div class='modal-dialog'>
+                          <div class='modal-content'>
+                            <div class='modal-header'>
+                              <h5 class='modal-title' id='editarModalLabel{$groupId}'>Editar Grupo {$groupLetter}</h5>
+                              <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+                            </div>
+                            <div class='modal-body'>
+                              <form method='POST' action='editar_grupo.php'>
+                                <input type='hidden' name='id_grupo' value='{$groupId}'>
+                                <div class='mb-3'>
+                                  <label for='claveGrupo' class='form-label'>Clave del Grupo</label>
+                                  <input type='text' class='form-control' id='claveGrupo' name='claveGrupo' value='{$row['ClaveGrupo']}'>
+                                </div>
+                                <div class='mb-3'>
+                                  <label for='capacidad' class='form-label'>Capacidad</label>
+                                  <input type='number' class='form-control' id='capacidad' name='capacidad' value='{$row['Capacidad']}'>
+                                </div>
+                                <div class='mb-3'>
+                                  <label for='fechaI' class='form-label'>Fecha de Inicio</label>
+                                  <input type='date' class='form-control' id='fechaI' name='fechaI' value='{$row['FechaI']}'>
+                                </div>
+                                <div class='mb-3'>
+                                  <label for='fechaF' class='form-label'>Fecha de Fin</label>
+                                  <input type='date' class='form-control' id='fechaF' name='fechaF' value='{$row['FechaF']}'>
+                                </div>
+                                <button type='submit' class='btn btn-primary'>Guardar Cambios</button>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                      </div>";
+
+                // Modal para agregar diplomas
+                echo "<div class='modal fade' id='diplomaModal{$groupId}' tabindex='-1' aria-labelledby='diplomaModalLabel{$groupId}' aria-hidden='true'>
+                        <div class='modal-dialog'>
+                          <div class='modal-content'>
+                            <div class='modal-header'>
+                              <h5 class='modal-title' id='diplomaModalLabel{$groupId}'>Agregar Diploma al Grupo {$groupLetter}</h5>
+                              <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+                            </div>
+                            <div class='modal-body'>
+                              <form method='POST' action='agregar_diploma.php'>
+                                <input type='hidden' name='id_grupo' value='{$groupId}'>
+                                <div class='mb-3'>
+                                  <label for='nombreDiploma' class='form-label'>Nombre del Diploma</label>
+                                  <input type='text' class='form-control' id='nombreDiploma' name='nombreDiploma'>
+                                </div>
+                                <div class='mb-3'>
+                                  <label for='linkDiploma' class='form-label'>Link del Diploma</label>
+                                  <input type='text' class='form-control' id='linkDiploma' name='linkDiploma'>
+                                </div>
+                                <button type='submit' class='btn btn-primary'>Agregar Diploma</button>
+                              </form>
+                              
+                            </div>
+                          </div>
+                        </div>
+                      </div>";
+            }
+            echo "</tbody></table>";
+
+            // Paginación
+            $sqlTotal = "SELECT COUNT(*) as total FROM grupo";
+            $resultTotal = $conn->query($sqlTotal);
+            $total = $resultTotal->fetch_assoc()['total'];
+            $totalPages = ceil($total / $limit);
+
+            echo "<nav aria-label='Page navigation'>
+                    <ul class='pagination justify-content-center'>";
+            for ($i = 1; $i <= $totalPages; $i++) {
+                echo "<li class='page-item ".($i == $page ? 'active' : '')."'><a class='page-link' href='grupo.php?page={$i}'>{$i}</a></li>";
+            }
+            echo "  </ul>
+                  </nav>";
+        } else {
+            echo "<p>No se encontraron grupos.</p>";
+        }
+
+        // Consulta para obtener los grupos finalizados
+        $sqlFinalizados = "SELECT g.ClaveGrupo, g.FechaF, c.NombreCurso, g.Capacidad 
+                           FROM grupos_finalizados gf
+                           JOIN grupo g ON gf.Fk_id_Grupo = g.id_Grupo
+                           JOIN curso c ON gf.Fk_id_Curso = c.id_Curso";
+        $resultFinalizados = $conn->query($sqlFinalizados);
+
+        if ($resultFinalizados->num_rows > 0) {
+            echo "<h2 class='text-center mt-5'>Grupos Finalizados</h2>";
+            echo "<table class='table table-striped'>
+                    <thead>
+                        <tr>
+                            <th>Fecha de Fin</th>
+                            <th>Nombre del Curso</th>
+                            <th>Clave del Grupo</th>
+                            <th>Capacidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>";
+
+            while ($row = $resultFinalizados->fetch_assoc()) {
+                echo "<tr>
+                        <td>{$row['FechaF']}</td>
+                        <td>{$row['NombreCurso']}</td>
+                        <td>{$row['ClaveGrupo']}</td>
+                        <td>{$row['Capacidad']}</td>
+                      </tr>";
             }
             echo "</tbody></table>";
         } else {
-            echo "<p>No se encontraron grupos.</p>";
+            echo "<p>No se encontraron grupos finalizados.</p>";
         }
 
         $conn->close();

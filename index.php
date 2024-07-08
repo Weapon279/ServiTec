@@ -462,8 +462,31 @@ body {
   <div class="w3-row-padding">
     <div class="w3-col m6">
       <h3>Reconocimientos.</h3>
-      <p>Felicidades al Ingeniero Giovanni por su accenso<br>tempor incididunt ut labore et dolore.</p>
-      <p><a href="#servicios" class="w3-button w3-green-custom"><i class="fa fa-th"> </i> Ver Servicios</a></p>
+      
+      <?php
+try {
+    // Consulta SQL para obtener la última noticia insertada
+    $sql = "SELECT * FROM noticias ORDER BY id_noticia DESC LIMIT 1";
+    $stmt = $conn->query($sql);
+
+    // Verificar si se encontraron resultados
+    if ($stmt->rowCount() > 0) {
+        $noticia = $stmt->fetch(PDO::FETCH_ASSOC);
+        echo "<h3>{$noticia['titulo']}</h3>";
+        echo "<p>{$noticia['contenido']}</p>";
+    } else {
+        echo "<p>No hay noticias disponibles.</p>";
+    }
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
+}
+
+// Cerrar la conexión
+$conn = null;
+?>
+
+      
+      <p><a href="#servicios" class="w3-button w3-green-custom"><i class="fa fa-th"> </i> Ver Servicios</a></p>
     </div>
     <div class="w3-col m6">
       <img class="w3-image w3-round-large" src="recursos/img/acceso.webp" alt="Buildings" width="250" height="250">
@@ -471,6 +494,7 @@ body {
   </div>
 </div>
 <!-- fin Reconocimientos -->
+
 
 
 <!-- Cursos proxims -->

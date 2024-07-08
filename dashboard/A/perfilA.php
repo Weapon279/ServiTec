@@ -1,8 +1,6 @@
-<?php include 'indexb.php'; ?>
-
 <?php
-session_start();
 require 'conexion.php';
+require 'indexb.php';
 
 // Verificar si el usuario ha iniciado sesión
 if (!isset($_SESSION['userId'])) {
@@ -14,7 +12,7 @@ if (!isset($_SESSION['userId'])) {
 $userId = $_SESSION['userId'];
 
 // Consulta para obtener la información del usuario
-$stmt = $pdo->prepare("
+$stmt = $conn->prepare("
     SELECT u.vNombre, u.vApellidoP, u.vApellidoM, u.vCorreo, u.nWhats, u.iFechaHoraC, tu.NombreTypeUser 
     FROM user u
     JOIN typeuser tu ON u.Fk_TypeUser = tu.id_TypeUser

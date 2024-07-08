@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $row_check_finalizados = $result_check_finalizados->fetch_assoc();
 
             if ($row_check_finalizados['total'] > 0) {
-                throw new Exception('No se puede eliminar el grupo porque tiene registros relacionados en grupos_finalizados.');
+                throw new Exception('Error al eliminar el grupo.');
             }
 
             // Mover grupo a la tabla grupos_finalizados

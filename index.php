@@ -15,10 +15,13 @@ try {
                 c.CostoCurso,
                 c.ImagenCurso,
                 o.NombreOfer
+                
             FROM 
                 curso c
             JOIN 
                 oferta o ON c.Fk_id_ofer = o.id_ofer
+                            LEFT JOIN 
+                convocatoria conv ON conv.Fk_id_Curso = c.id_Curso
             WHERE 
                 c.Status = 'Falta Informacion'
             ORDER BY c.FechaHoraC ASC
@@ -33,8 +36,6 @@ try {
 ?>
 
 <?php
-
-
 try {
     $sql = "SELECT 
                 c.id_Curso,
@@ -47,11 +48,14 @@ try {
                 c.Modalidad,
                 c.CostoCurso,
                 c.ImagenCurso,
-                o.NombreOfer
+                o.NombreOfer,
+                conv.DocenteConvoca
             FROM 
                 curso c
             JOIN 
                 oferta o ON c.Fk_id_ofer = o.id_ofer
+            LEFT JOIN 
+                convocatoria conv ON conv.Fk_id_Curso = c.id_Curso
             WHERE 
                 c.Status = 'Disponible'
             ORDER BY c.FechaHoraC ASC
@@ -64,6 +68,7 @@ try {
     echo "Error: " . $e->getMessage();
 }
 ?>
+
 
 <?php
 
@@ -511,7 +516,7 @@ $conn = null;
           <div class="w3-container">
             <h3><?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?></h3>
             <p><?php echo htmlspecialchars($curso['DescripcionCurso'] ?? ''); ?></p>
-            <p>Docente: <?php echo htmlspecialchars($curso['NombreDoc'] ?? ''); ?></p>
+            <p>Docente: <?php echo htmlspecialchars($curso['DocenteConvocatoria'] ?? ''); ?></p>
             <p>Fecha Inicio: <?php echo htmlspecialchars($curso['FechaHoraC'] ?? ''); ?></p>
             <p>Termino: <?php echo htmlspecialchars($curso['FechaHoraA'] ?? ''); ?></p>
             <p>Modalidad: <?php echo htmlspecialchars($curso['Modalidad'] ?? ''); ?></p>
@@ -563,7 +568,7 @@ $conn = null;
           <div class="w3-container">
             <h3><?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?></h3>
             <p><?php echo htmlspecialchars($curso['DescripcionCurso'] ?? ''); ?></p>
-            <p>Docente: <?php echo htmlspecialchars($curso['NombreDoc'] ?? ''); ?></p>
+            <p>Docente: <?php echo htmlspecialchars($curso['DocenteConvoca'] ?? ''); ?></p>
             <p>Modalidad: <?php echo htmlspecialchars($curso['Modalidad'] ?? ''); ?></p>
             <p>Costo: $<?php echo htmlspecialchars($curso['CostoCurso'] ?? ''); ?></p>
             <p><a href="login.php" class="w3-button w3-green-custom w3-block"><i class="fa fa-user"> </i> ¡Registrarme ahora!</a></p>

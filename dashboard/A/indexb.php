@@ -55,7 +55,7 @@ $userType = $_SESSION['userType'];
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
         <li class="nav-item">
-            <a href="usuario.php" class="nav-link <?php echo $page == 'dashboard' ? 'active' : ''; ?>">
+            <a href="../dashb.php" class="nav-link <?php echo $page == 'dashboard' ? 'active' : ''; ?>">
                 <i class="fa fa-home"></i> Inicio
             </a>
         </li>

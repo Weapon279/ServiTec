@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 require 'conexion.php';
 require 'indexb.php';
 

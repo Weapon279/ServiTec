@@ -1,4 +1,9 @@
 <?php
+
+
+?>
+
+<?php
 include 'indexa.php';
 include 'conexion.php';
 session_start();
@@ -69,6 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (!$grupo_id) {
                 throw new Exception('ID de grupo no válido.');
             }
+
+            
 
             // Verificar si hay registros relacionados en grupos_finalizados
             $sql_check_finalizados = "SELECT COUNT(*) as total FROM grupos_finalizados WHERE Fk_id_Grupo = ?";
@@ -216,10 +223,11 @@ function getGroupNumber($id) {
                         <td>{$row['FechaI']}</td>
                         <td>{$row['FechaF']}</td>
                         <td><button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#alumnosModal{$groupId}'>Ver Alumnos</button></td>
-                        <td><button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#aspirantesModal{$groupId}'>Ver Aspirantes</button></td>
+                        <td><button type='button' class='btn btn-primary btn-sm' data-bs-toggle='modal' data-bs-target='#aspirantesModal{$groupId}'>Ver Aspirantes</button></td>
                         <td>
                             <button type='button' class='btn btn-warning' data-bs-toggle='modal' data-bs-target='#editarModal{$groupId}'>Editar</button>
-                            <button type='button' class='btn btn-success' data-bs-toggle='modal' data-bs-target='#diplomaModal{$groupId}'>Agregar Diploma</button>
+                            <button type='button' class='btn btn-success' data-bs-toggle='modal' data-bs-target='#diplomaModal{$groupId}'>Agregar Constancias</button>
+                                                        <button type='button' class='btn btn-success' data-bs-toggle='modal' data-bs-target='#diplomaverModal{$groupId}'>Ver Constancias</button>
                                                     <form action='grupo.php' method='post' style='display:inline-block;'>
                                 <input type='hidden' name='accion' value='finalizar'>
                                 <input type='hidden' name='grupo_id' value='{$groupId}'>
@@ -372,6 +380,42 @@ function getGroupNumber($id) {
                           </div>
                         </div>
                       </div>";
+
+// Modal Ver constancias
+$sqlDiplomas = "SELECT NombreDiploma, LinkDiploma, FechaHoraC FROM diplomas WHERE Fk_id_Grupo = ?";
+$stmtDiplomas = $conn->prepare($sqlDiplomas);
+$stmtDiplomas->bind_param("i", $groupId);
+$stmtDiplomas->execute();
+$resultDiplomas = $stmtDiplomas->get_result();
+
+echo "<div class='modal fade' id='diplomaverModal{$groupId}' tabindex='-1' aria-labelledby='diplomaverModal{$groupId}' aria-hidden='true'>
+        <div class='modal-dialog'>
+            <div class='modal-content'>
+                <div class='modal-header'>
+                    <h5 class='modal-title' id='diplomaverModal{$groupId}'>Constancias del Grupo {$groupLetter}</h5>
+                    <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+                </div>
+                <div class='modal-body'>";
+
+if ($resultDiplomas->num_rows > 0) {
+    echo "<ul>";
+    while ($diploma = $resultDiplomas->fetch_assoc()) {
+        echo "<li>
+                <strong>Nombre:</strong> {$diploma['NombreDiploma']}<br>
+                <strong>Enlace:</strong> <a href='{$diploma['LinkDiploma']}' target='_blank'>Ver Diploma</a><br>
+                <strong>Fecha de Creación:</strong> " . date('d/m/Y H:i', strtotime($diploma['FechaHoraC'])) . "
+              </li><hr>";
+    }
+    echo "</ul>";
+} else {
+    echo "<p>No hay constancias registradas para este grupo.</p>";
+}
+
+echo "          </div>
+            </div>
+        </div>
+      </div>";
+
             }
             echo "</tbody></table>";
 

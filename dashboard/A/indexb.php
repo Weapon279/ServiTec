@@ -1,6 +1,5 @@
 
 <?php
-session_start();
 require 'conexion.php';
 
 // Verificar si el usuario está autenticado
@@ -39,7 +38,7 @@ $userType = $_SESSION['userType'];
                     <a class="nav-link active" aria-current="page" href="mensaje.php"><i class="fa fa-envelope"></i></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="cerrar.php"><i class="fa fa-sign-out"></i> Cerrar Sesión</a>
+                    <a class="nav-link" href="../dashboard/a/index.php"><i class="fa fa-sign-out"></i> Cerrar Sesión</a>
                 </li>
             </ul>
         </div>

@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     try {
         // Insertar el nuevo diploma en la base de datos
-        $sql = "INSERT INTO diplomas (Fk_id_Grupo, NombreDiploma, LinkDiploma, FechaHoraC) VALUES (?, ?, ?,  NOW())";
+        $sql = "SELECT INTO diplomas (Fk_id_Grupo, NombreDiploma, LinkDiploma, FechaHoraC) VALUES (?, ?, ?,  NOW())";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("iss", $id_grupo, $nombreDiploma, $linkDiploma);
         $stmt->execute();

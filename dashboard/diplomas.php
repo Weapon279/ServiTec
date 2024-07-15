@@ -9,16 +9,18 @@
         <thead>
             <tr>
                 <th>Nombre del Diploma</th>
+                <th>ID Grupo</th>
                 <th>Link</th>
             </tr>
         </thead>
         <tbody>
             <?php
-            $sql = "SELECT NombreDiploma, LinkDiploma FROM diplomas";
+            $sql = "SELECT NombreDiploma, Fk_id_Grupo, LinkDiploma FROM diplomas";
             $result = $conn->query($sql);
             while($row = $result->fetch_assoc()) {
                 echo "<tr>
                         <td>{$row['NombreDiploma']}</td>
+                        <td>{$row['Fk_id_Grupo']}</td>
                         <td><a href='{$row['LinkDiploma']}' target='_blank'>Ver Contancias</a></td>
                     </tr>";
             }

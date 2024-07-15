@@ -21,6 +21,18 @@ function contarServicios($conn, $status) {
     return $row['total'];
 }
 
+$sqlCursosVendidos = "SELECT NombreCurso, COUNT(*) AS totalVendidos 
+                      FROM grupos_finalizados 
+                      GROUP BY NombreCurso";
+$resultCursosVendidos = $conn->query($sqlCursosVendidos);
+
+$cursos = [];
+$totales = [];
+
+while($row = $resultCursosVendidos->fetch_assoc()) {
+    $cursos[] = $row['NombreCurso'];
+    $totales[] = $row['totalVendidos'];
+}
 // Obtener el número de servicios en curso
 $serviciosEnCurso = contarServicios($conn, 'Disponible');
 
@@ -124,7 +136,12 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
     </div>
   </div>
 
-  <div class="row">
+  <div class="col-md-12 mt-4">
+  <div class="w3-main" style="margin-left:300px;margin-top:43px;">
+  <header class="w3-container" style="padding-top:22px">
+  </header>
+
+  <div class="col-md-12 mt-4">
     <!-- Gráfica de cursos vendidos -->
     <div class="col-md-6">
         <div class="card">
@@ -135,6 +152,40 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
         </div>
     </div>
     <!-- Fin Gráfica de cursos vendidos -->
+
+
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Obtener los datos del gráfico
+const ctx = document.getElementById('ventasCursosChart').getContext('2d');
+const cursos = <?php echo json_encode($cursos); ?>;
+const totales = <?php echo json_encode($totales); ?>;
+
+const ventasCursosChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: cursos,
+        datasets: [{
+            label: 'Total Vendidos',
+            data: totales,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+
 
     <!-- Próximos cursos -->
     <div class="col-md-6">

@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['userId'])) {
                 <th>Apellido Materno</th>
                 <th>Correo</th>
                 <th>WhatsApp</th>
-                <th>Curso Actual</th>
+                <th></th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -67,11 +67,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['userId'])) {
             $search = isset($_GET['search']) ? '%' . $_GET['search'] . '%' : '%%';
 
             // Consulta SQL con búsqueda y paginación
-            $sql = "SELECT  user.id_User, user.vNombre, user.vApellidoP, user.vApellidoM, user.vCorreo, user.nWhats, curso.NombreCurso 
+            $sql = "SELECT  user.id_User, user.vNombre, user.vApellidoP, user.vApellidoM, user.vCorreo, user.nWhats
                     FROM user 
-                    LEFT JOIN alumnos ON user.id_User = alumnos.Fk_id_User 
-                    LEFT JOIN grupo ON alumnos.id_Alumno = grupo.Fk_id_Alumno 
-                    LEFT JOIN curso ON grupo.Fk_id_Curso = curso.id_Curso 
+
                     WHERE user.vNombre LIKE ? OR user.vApellidoP LIKE ? OR user.vApellidoM LIKE ? OR user.vCorreo LIKE ? 
                     ORDER BY user.vNombre ASC 
                     LIMIT ?, ?";

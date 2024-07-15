@@ -1,5 +1,7 @@
 <?php
 include 'conexion.php';
+include 'indexa.php';
+
 
 $response = array("success" => false);
 
@@ -12,6 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $status = 'Falta Informacion';
     $claveGrupo = $_POST['claveGrupo'];
     $capacidad = $_POST['capacidad'];
+    $descripcion = isset($_POST['descripcion']) ? $_POST['descripcion'] : '';
     $costo = $_POST['costo'];
     $bstatus = '1';
 
@@ -61,12 +64,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($conn->query($sqlCurso) === TRUE) {
                 $cursoId = $conn->insert_id;  // Obtener el ID del curso insertado
 
-                // Insertar en la tabla `grupo`
-                $sqlGrupo = "INSERT INTO grupo (Fk_id_Curso, ClaveGrupo, Capacidad, Costo, FechaHoraC, Status) 
-                             VALUES ('$cursoId', '$claveGrupo', '$capacidad', '$costo', NOW(), '$bstatus')";
 
-                if ($conn->query($sqlGrupo) === TRUE) {
-                    $response["success"] = true;
+
+       
                     // Redirigir al usuario a "cursos.php" después de 3 segundos
                     header("Refresh: 3; url=cursos.php");
                     exit;
@@ -84,7 +84,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     $conn->close();
-}
+
 
 echo json_encode($response);
 ?>

@@ -106,7 +106,7 @@ $totalServicios = $stmtServicios->fetch(PDO::FETCH_ASSOC)['totalServicios'];
 ?>
 <?php
 $directory = 'dashboard/img/';
-$images = glob($directory . '*.{jpg,webp,web,jpeg,png,gif}', GLOB_BRACE);
+$images = glob($directory . '*.{png,jpg,webp,web,jpeg,png,gif}', GLOB_BRACE);
 ?>
 
 <?php include 'modelo/conexion.php';?>
@@ -504,7 +504,7 @@ $conn = null;
 
 <!-- Cursos proxims -->
 
-<!-- Cursos próximos -->
+<!-- Próximos Cursos -->
 <div class="w3-container" style="padding:128px 16px" id="">
   <h3 class="w3-center">Próximos Cursos</h3>
   <p class="w3-center w3-large">¡INSCRÍBETE AHORA!</p>
@@ -512,11 +512,12 @@ $conn = null;
   <?php if (!empty($cursos)) { ?>
     <?php foreach ($cursos as $curso) { ?>
       <div class="w3-col l3 m6 w3-margin-bottom">
-      <img src="<?php echo htmlspecialchars($curso['ImagenCurso'] ?? 'default.webp ,default.webp default,jpg'); ?>" alt="<?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?>" style="width:100%">        <div class="w3-card">
+        <div class="w3-card">
+          <img src="<?php echo htmlspecialchars($curso['ImagenCurso'] ?? 'default.jpg'); ?>" alt="<?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?>" style="width:100%">
           <div class="w3-container">
             <h3><?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?></h3>
             <p><?php echo htmlspecialchars($curso['DescripcionCurso'] ?? ''); ?></p>
-            <p>Docente: <?php echo htmlspecialchars($curso['DocenteConvocatoria'] ?? ''); ?></p>
+            <p>Docente: <?php echo htmlspecialchars($curso['NombreDoc'] ?? ''); ?></p>
             <p>Fecha Inicio: <?php echo htmlspecialchars($curso['FechaHoraC'] ?? ''); ?></p>
             <p>Termino: <?php echo htmlspecialchars($curso['FechaHoraA'] ?? ''); ?></p>
             <p>Modalidad: <?php echo htmlspecialchars($curso['Modalidad'] ?? ''); ?></p>
@@ -530,7 +531,7 @@ $conn = null;
     <p class="w3-center">No hay cursos disponibles en este momento.</p>
   <?php } ?>
 </div>
-<!-- Fin Cursos próximos -->
+
 
 
 <!-- lista de cursos -->

@@ -19,7 +19,7 @@ $sqlGroup = "
     FROM alumnos 
     JOIN grupo ON alumnos.Fk_Id_Grupo = grupo.id_Grupo
     JOIN curso ON grupo.Fk_id_Curso = curso.id_Curso
-    WHERE alumnos.Fk_id_User = ?
+    WHERE alumnos.Fk_id_User = ? AND grupo.Status = '1'
 ";
 $stmt = $conn->prepare($sqlGroup);
 $stmt->bind_param('i', $studentId);
@@ -42,6 +42,8 @@ if ($groupResult->num_rows > 0) {
     $capacidad = isset($groupInfo['Capacidad']) ? htmlspecialchars($groupInfo['Capacidad']) : "";
     $costo = isset($groupInfo['CostoCurso']) ? htmlspecialchars($groupInfo['CostoCurso']) : "";
     $status = isset($groupInfo['Status']) ? htmlspecialchars($groupInfo['Status']) : "";
+} else {
+    echo "No hay grupos activos en los que estés inscrito.";
 }
 
 $conn->close(); // Cerrar la conexión

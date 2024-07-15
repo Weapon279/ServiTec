@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'indexb.php';
+include 'indexa.php';
 require 'conexion.php';
 
 // Verificar si el usuario ha iniciado sesión
@@ -17,13 +17,14 @@ $sql = "
     SELECT NombreDiploma, LinkDiploma, FechaHoraC 
     FROM diplomas 
     WHERE Fk_id_Grupo IN (
-        SELECT Fk_Id_Grupo FROM alumnos WHERE Fk_id_User = :userId
+        SELECT Fk_Id_Grupo FROM alumnos WHERE Fk_id_User = ?
     )
 ";
 $stmt = $conn->prepare($sql);
-$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+$stmt->bind_param("i", $userId);
 $stmt->execute();
-$diplomas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$result = $stmt->get_result();
+$diplomas = $result->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>

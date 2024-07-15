@@ -16,17 +16,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         switch ($_POST['action']) {
             case 'edit':
                 // Editar curso
-                $nombreCurso = $_POST['nombreCurso'];
-                $modalidad = $_POST['modalidad'];
-                $descripcionCurso = $_POST['descripcionCurso'];
-                $conocimientoCurso = $_POST['ConocimientosCurso'];
-                $contenidoCurso = $_POST['ContenidoCurso'];
-                $descripcionCurso = $_POST['ObjectivoCurso'];
-                $docenteConvoca = $_POST['DocenteConvoca'];
-                $capacidad = $_POST['capacidad'];
+                $nombreCurso = isset($_POST['nombreCurso']) ? $_POST['nombreCurso'] : '';
+                $modalidad = isset($_POST['modalidad']) ? $_POST['modalidad'] : '';
+                $descripcionCurso = isset($_POST['descripcionCurso']) ? $_POST['descripcionCurso'] : '';
+                $conocimientoCurso = isset($_POST['ConocimientosCurso']) ? $_POST['ConocimientosCurso'] : '';
+                $contenidoCurso = isset($_POST['contenidoCurso']) ? $_POST['contenidoCurso'] : '';
+                $objectivoCurso = isset($_POST['objectivoCurso']) ? $_POST['objectivoCurso'] : '';
+                $docenteConvoca = isset($_POST['DocenteConvoca']) ? $_POST['DocenteConvoca'] : '';
+                $capacidad = isset($_POST['capacidad']) ? $_POST['capacidad'] : '';
+                $costo = isset($_POST['costo']) ? $_POST['costo'] : '';
+                
                 $costo = $_POST['costo'];
                 $sql = "UPDATE curso 
-                        SET NombreCurso = '$nombreCurso', Modalidad = '$modalidad', DescripcionCurso = '$descripcionCurso', CostoCurso = '$costo'
+                        SET NombreCurso = '$nombreCurso', Modalidad = '$modalidad', DescripcionCurso = '$descripcionCurso', CostoCurso = '$costo' , ObjectivoCurso = '$objectivoCurso', ConocimientosCurso = '$conocimientoCurso'
                         WHERE id_Curso = $courseId";
                 $conn->query($sql);
                 $sql = "UPDATE convocatoria 
@@ -67,58 +69,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $conn->query($sql);
                 break;
 
+                case 'launch':
+                  // Lanzar curso
+                  $fechaInicio = $_POST['fechaInicio'];
+                  $fechaFin = $_POST['fechaFin'];
+                  $fechaHoraActual = date('Y-m-d H:i:s');
+                  $nombreGrupo = $_POST['nombreGrupo'];  // Asegúrate de obtener este valor del formulario
+              
+                  $sqlCurso = "UPDATE curso SET Status = 'Disponible' WHERE id_Curso = $courseId";
 
-                          case 'launch':
-                              // Lanzar curso
-                              $fechaInicio = $_POST['fechaInicio'];
-                              $fechaFin = $_POST['fechaFin'];
-                              $fechaHoraActual = date('Y-m-d H:i:s');
+                  // Insertar nuevo grupo
+                  $sqlGrupo = "INSERT INTO grupo (Fk_id_Curso, ClaveGrupo, FechaI, FechaF, Capacidad, Status, FechaHoraC, FechaHoraA) 
+                               VALUES ($courseId, '$nombreGrupo', '$fechaInicio', '$fechaFin', 1, 1, '$fechaHoraActual', '$fechaHoraActual')";
               
-                              $sqlCurso = "UPDATE curso SET Status = 'Disponible' WHERE id_Curso = $courseId";
-              
-                              // Insertar nuevo grupo
-                              $sqlGrupo = "INSERT INTO grupo (Fk_id_Curso, ClaveGrupo, FechaI, FechaF,Capacidad, Costo  Status, FechaHoraC, FechaHoraA) 
-                                           VALUES ($courseId,'$nombreCurso', '$fechaInicio', '$fechaFin', 1, '$fechaHoraActual', '$fechaHoraActual')";
-              
-                              if ($conn->query($sqlCurso) === TRUE && $conn->query($sqlGrupo) === TRUE) {
-                                  echo "Curso lanzado correctamente.";
-                              } else {
-                                  echo "Error: " . $conn->error;
-                              }
-                              break;
+                  if ($conn->query($sqlCurso) === TRUE && $conn->query($sqlGrupo) === TRUE) {
+                      echo "Curso lanzado correctamente.";
+                  } else {
+                      echo "Error: " . $conn->error;
+                  }
+                  break;
+                  case 'toggle_status':
+                    // Cambiar estado del curso
+                    $newStatus = $_POST['status'] == 'Disponible' ? 'Cancelado' : 'Disponible';
+                    $sql = "UPDATE curso SET Status = '$newStatus' WHERE id_Curso = $courseId";
+                    $conn->query($sql);
+                    break;
+            
                       }
               
-    
+                    
+                  
+                  
               
               
       
 
-        // Actualizar el estado del curso según sea necesario
-        $capacidadSql = "SELECT Capacidad FROM grupo WHERE Fk_id_Curso = $courseId";
-        $capacidadResult = $conn->query($capacidadSql);
-        $capacidadRow = $capacidadResult->fetch_assoc();
-        $capacidadMaxima = $capacidadRow['Capacidad'];
 
-        $alumnosSql = "SELECT COUNT(*) AS total FROM grupo WHERE Fk_id_Curso = $courseId";
-        $alumnosResult = $conn->query($alumnosSql);
-        $alumnosRegistrados = $alumnosResult->fetch_assoc()['total'];
-
-        $cursoSql = "SELECT FechaHoraC, FechaHoraA FROM curso WHERE id_Curso = $courseId";
-        $cursoResult = $conn->query($cursoSql);
-        $cursoRow = $cursoResult->fetch_assoc();
-        $fechaInicio = $cursoRow['FechaHoraC'];
-        $fechaFin = $cursoRow['FechaHoraA'];
-
-        if (empty($fechaInicio) && empty($fechaFin)) {
-            $status = 'Falta Informacion';
-        } elseif ($alumnosRegistrados < ($capacidadMaxima / 2)) {
-            $status = 'Suspender';
-        }
-
-        if ($status) {
-            $sql = "UPDATE curso SET Status = '$status' WHERE id_Curso = $courseId";
-            $conn->query($sql);
-        }
     }
 }
 
@@ -134,7 +120,7 @@ $totalPages = ceil($totalCourses / $resultsPerPage);
 $offset = ($page - 1) * $resultsPerPage;
 
 // Consulta SQL paginada con orden alfabético por nombre de curso
-$sql = "SELECT curso.id_Curso, curso.NombreCurso, curso.Modalidad, curso.DescripcionCurso, curso.ObjectivoCurso, curso.ConocimientosCurso, curso.ContenidoCurso, convocatoria.DocenteConvoca, curso.FechaHoraC, curso.FechaHoraA, grupo.Capacidad, curso.CostoCurso, curso.Status 
+$sql = "SELECT curso.id_Curso, curso.NombreCurso, curso.Modalidad, curso.DescripcionCurso, curso.ObjectivoCurso, curso.ConocimientosCurso, curso.ContenidoCurso, curso.FechaHoraC, curso.FechaHoraA, grupo.Capacidad, curso.CostoCurso, curso.Status , convocatoria.DocenteConvoca
         FROM curso 
         LEFT JOIN grupo ON curso.id_Curso = grupo.Fk_id_Alumno
         LEFT JOIN convocatoria ON curso.Fk_id_ofer = convocatoria.Id_Convoca
@@ -170,7 +156,6 @@ $result = $conn->query($sql);
         <th>Objectivo</th>
         <th>Conocimientos</th>
         <th>Docente</th>
-        <th>Cupo Máximo</th>
         <th>Costo</th>
         <th>Activar</th>
         <th>Estatus</th>
@@ -195,7 +180,6 @@ $result = $conn->query($sql);
                   <td>{$row['ObjectivoCurso']}</td>
                   <td>{$row['ConocimientosCurso']}</td>
                   <td>{$row['DocenteConvoca']}</td>
-                  <td>{$registeredStudents}/{$row['Capacidad']}</td>
                   <td>{$row['CostoCurso']}</td>
                   <td><button class='btn btn-info' data-bs-toggle='modal' data-bs-target='#actividadModal{$courseId}'><i class='fa fa-play'></i></button></td>
                   <td><span class='badge bg-" . ($status === "Disponible" ? "success" : ($status === "Cancelado" ? "danger" : ($status === "Suspender" ? "warning" : "info"))) . "'>{$status}</span></td>
@@ -206,7 +190,15 @@ $result = $conn->query($sql);
                         <input type='hidden' name='id_Curso' value='{$courseId}'>
                         <input type='hidden' name='action' value='cancel'>
                         <button type='submit' class='btn btn-danger'><i class='fa fa-trash'></i></button>
-                      </form>
+                         
+                        <form method='post' action=''>
+                      <input type='hidden' name='id_Curso' value='{$courseId}'>
+                      <input type='hidden' name='action' value='toggle_status'>
+                      <input type='hidden' name='status' value='{$status}'>
+                        <div class='form-check form-switch'>
+                        <input class='form-check-input' type='checkbox' id='statusSwitch{$courseId}' " . ($status == 'Disponible' ? 'checked' : '') . " onchange='this.form.submit()'>
+                      </div>
+                        </form>
                       <form method='post' style='display:inline-block'>
                         <input type='hidden' name='id_Curso' value='{$courseId}'>
                         <input type='hidden' name='action' value='pause'>
@@ -228,56 +220,55 @@ $result = $conn->query($sql);
 
           // Modal para editar curso
           echo "<div class='modal fade' id='editModal{$courseId}' tabindex='-1' aria-labelledby='editModalLabel' aria-hidden='true'>
-                  <div class='modal-dialog'>
-                    <div class='modal-content'>
-                      <div class='modal-header'>
-                        <h5 class='modal-title' id='editModalLabel'>Editar Curso: {$row['NombreCurso']}</h5>
-                        <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
-                      </div>
-                      <div class='modal-body'>
-                        <form action='' method='post'>
-                          <input type='hidden' name='id_Curso' value='{$courseId}'>
-                          <input type='hidden' name='action' value='edit'>
-                          <div class='mb-3'>
-                            <label for='nombreCurso' class='form-label'>Nombre del Curso</label>
-                            <input type='text' class='form-control' id='nombreCurso' name='nombreCurso' value='{$row['NombreCurso']}' required>
-                          </div>
-                          <div class='mb-3'>
-                            <label for='modalidad' class='form-label'>Modalidad</label>
-                            <input type='text' class='form-control' id='modalidad' name='modalidad' value='{$row['Modalidad']}' required>
-                          </div>
-                          <div class='mb-3'>
-                            <label for='descripcionCurso' class='form-label'>Descripción</label>
-                            <textarea class='form-control' id='descripcionCurso' name='descripcionCurso' rows='3' required>{$row['DescripcionCurso']}</textarea>
-                          </div>
-                          <div class='mb-3'>
-                            <label for='descripcionCurso' class='form-label'>Objectivo </label>
-                            <input type='text' class='form-control' id='descripcionCurso' name='descripcionCurso' value='{$row['ObjectivoCurso']}' required>
-                          </div>
-                                                    </div>
-                          <div class='mb-3'>
-                            <label for='conocimientoCurso' class='form-label'>Cocinimiento Curso</label>
-                            <input type='text' class='form-control' id='conocimientoCurso' name='conocimientoCurso' value='{$row['ConocimientosCurso']}' required>
-                          </div>
-                                                    </div>
-                          <div class='mb-3'>
-                            <label for='contenidoCurso' class='form-label'>Contenido Curso</label>
-                            <input type='text' class='form-control' id='contenidoCurso' name='contenidoCurso' value='{$row['ContenidoCurso']}' required>
-                          </div>
-                          <div class='mb-3'>
-                            <label for='capacidad' class='form-label'>Capacidad</label>
-                            <input type='number' class='form-control' id='capacidad' name='capacidad' value='{$row['Capacidad']}' required>
-                          </div>
-                          <div class='mb-3'>
-                            <label for='costo' class='form-label'>Costo</label>
-                            <input type='number' class='form-control' id='costo' name='costo' value='{$row['CostoCurso']}' required>
-                          </div>
-                          <button type='submit' class='btn btn-primary'>Guardar cambios</button>
-                        </form>
-                      </div>
-                    </div>
+          <div class='modal-dialog'>
+            <div class='modal-content'>
+              <div class='modal-header'>
+                <h5 class='modal-title' id='editModalLabel'>Editar Curso: {$row['NombreCurso']}</h5>
+                <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+              </div>
+              <div class='modal-body'>
+                <form action='' method='post'>
+                  <input type='hidden' name='id_Curso' value='{$courseId}'>
+                  <input type='hidden' name='action' value='edit'>
+                  <div class='mb-3'>
+                    <label for='nombreCurso' class='form-label'>Nombre del Curso</label>
+                    <input type='text' class='form-control' id='nombreCurso' name='nombreCurso' value='{$row['NombreCurso']}' required>
                   </div>
-                </div>";
+                  <div class='mb-3'>
+                    <label for='modalidad' class='form-label'>Modalidad</label>
+                    <input type='text' class='form-control' id='modalidad' name='modalidad' value='{$row['Modalidad']}' required>
+                  </div>
+                  <div class='mb-3'>
+                    <label for='descripcionCurso' class='form-label'>Descripción</label>
+                    <textarea class='form-control' id='descripcionCurso' name='descripcionCurso' rows='3' required>{$row['DescripcionCurso']}</textarea>
+                  </div>
+                  <div class='mb-3'>
+                    <label for='objectivoCurso' class='form-label'>Objetivo</label>
+                    <input type='text' class='form-control' id='objectivoCurso' name='objectivoCurso' value='{$row['ObjectivoCurso']}' required>
+                  </div>
+                  <div class='mb-3'>
+                    <label for='conocimientoCurso' class='form-label'>Conocimiento Curso</label>
+                    <input type='text' class='form-control' id='conocimientoCurso' name='conocimientoCurso' value='{$row['ConocimientosCurso']}' required>
+                  </div>
+                  <div class='mb-3'>
+                    <label for='contenidoCurso' class='form-label'>Contenido Curso</label>
+                    <input type='text' class='form-control' id='contenidoCurso' name='contenidoCurso' value='{$row['ContenidoCurso']}' required>
+                  </div>
+                  <div class='mb-3'>
+                    <label for='capacidad' class='form-label'>Capacidad</label>
+                    <input type='number' class='form-control' id='capacidad' name='capacidad' value='{$row['Capacidad']}' required>
+                  </div>
+                  <div class='mb-3'>
+                    <label for='costo' class='form-label'>Costo</label>
+                    <input type='number' class='form-control' id='costo' name='costo' value='{$row['CostoCurso']}' required>
+                  </div>
+                  <button type='submit' class='btn btn-primary'>Guardar cambios</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>";
+  
       }
       ?>
     </tbody>
@@ -312,7 +303,7 @@ while($row = $result->fetch_assoc()) {
                 <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
               </div>
               <div class='modal-body'>
-                <p>Contenido del modal para mostrar alumnos registrados...</p>
+                <p>El Curso no cuenta con grupos registrados...</p>
               </div>
             </div>
           </div>

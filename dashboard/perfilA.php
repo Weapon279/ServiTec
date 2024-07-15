@@ -2,11 +2,11 @@
 session_start();
 
 require 'conexion.php';
-require 'indexb.php';
+require 'indexa.php';
 
 // Verificar si el usuario ha iniciado sesión
 if (!isset($_SESSION['userId'])) {
-    header("Location: login.php");
+    header("Location: ../login.php");
     exit();
 }
 
@@ -18,15 +18,16 @@ $stmt = $conn->prepare("
     SELECT u.vNombre, u.vApellidoP, u.vApellidoM, u.vCorreo, u.nWhats, u.iFechaHoraC, tu.NombreTypeUser 
     FROM user u
     JOIN typeuser tu ON u.Fk_TypeUser = tu.id_TypeUser
-    WHERE u.id_User = :userId
+    WHERE u.id_User = ?
 ");
-$stmt->bindParam(':userId', $userId);
+$stmt->bind_param("i", $userId);
 $stmt->execute();
-$usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+$result = $stmt->get_result();
+$usuario = $result->fetch_assoc();
 
 // Si no se encuentra el usuario, redirigir al login
 if (!$usuario) {
-    header("Location: login.php");
+    header("Location: ../dashboard/a/login.php");
     exit();
 }
 ?>

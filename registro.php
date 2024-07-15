@@ -8,6 +8,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $vApellidoP = $_POST['vApellidoP'];
     $vApellidoM = $_POST['vApellidoM'];
     $nWhats = $_POST['nWhats'];
+    $curp = $_POST['curp']; // Obtener el CURP del formulario
     $Fk_TypeUser = 1;
     $bStatus = 'Activo'; 
 
@@ -16,11 +17,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
+    // Validar que el CURP sea único
+    $stmt_check_curp = $conn->prepare("SELECT COUNT(*) FROM user WHERE curp = :curp");
+    $stmt_check_curp->bindParam(':curp', $curp);
+    $stmt_check_curp->execute();
+    
+    if ($stmt_check_curp->fetchColumn() > 0) {
+        echo "El CURP ya está en uso. Por favor, ingrese uno diferente.";
+        exit();
+    }
+
     try {
         $conn->beginTransaction(); // Inicia una transacción
         
         // Insertar usuario en la tabla user
-        $stmt_user = $conn->prepare("INSERT INTO user (vCorreo, nPass, vNombre, vApellidoP, vApellidoM, nWhats, Fk_TypeUser, bStatus, iFechaHoraC, iFechaHoraA) VALUES (:vCorreo, :nPass, :vNombre, :vApellidoP, :vApellidoM, :nWhats, :Fk_TypeUser, :bStatus, NOW(), NOW())");
+        $stmt_user = $conn->prepare("INSERT INTO user (vCorreo, nPass, vNombre, vApellidoP, vApellidoM, nWhats, curp, Fk_TypeUser, bStatus, iFechaHoraC, iFechaHoraA) VALUES (:vCorreo, :nPass, :vNombre, :vApellidoP, :vApellidoM, :nWhats, :curp, :Fk_TypeUser, :bStatus, NOW(), NOW())");
         
         $stmt_user->bindParam(':vCorreo', $vCorreo);
         $stmt_user->bindParam(':nPass', $nPass);
@@ -28,6 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt_user->bindParam(':vApellidoP', $vApellidoP);
         $stmt_user->bindParam(':vApellidoM', $vApellidoM);
         $stmt_user->bindParam(':nWhats', $nWhats, PDO::PARAM_INT); 
+        $stmt_user->bindParam(':curp', $curp);
         $stmt_user->bindParam(':Fk_TypeUser', $Fk_TypeUser, PDO::PARAM_INT);
         $stmt_user->bindParam(':bStatus', $bStatus);
 
@@ -69,6 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
+
 
 
 <!DOCTYPE html>
@@ -179,6 +192,11 @@ body {
                     <label for="vApellidoM" class="form-label">Segundo Apellido</label>
                     <input type="text" class="form-control" id="vApellidoM" name="vApellidoM" placeholder="Escribe tu Apellido">
                 </div>
+                <div class="mb-3">
+                    <label for="curp" class="form-label">CURP</label>
+                    <input type="text" class="form-control" id="curp" name="curp" placeholder="Escribe tu CURP" required>
+                </div>
+
                 <div class="mb-3">
                     <label for="vCorreo" class="form-label">Correo Electrónico</label>
                     <input type="email" class="form-control" id="vCorreo" name="vCorreo" placeholder="Escribe tu Correo" required>

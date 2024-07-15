@@ -1,9 +1,4 @@
 <?php
-
-
-?>
-
-<?php
 include 'indexa.php';
 include 'conexion.php';
 session_start();
@@ -15,8 +10,10 @@ $limit = 10; // Número de registros por página
 $page = isset($_GET['page']) ? $_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
+// Motor de búsqueda
+$search_query = isset($_GET['search']) ? $_GET['search'] : '';
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Verifica si la clave 'interes_id' está definida en $_POST
     $interes_id = isset($_POST['interes_id']) ? $_POST['interes_id'] : null;
     $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
 
@@ -24,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($accion == 'aceptar') {
             $conn->begin_transaction();
 
-            // Obtener los datos del interés
             $sql = "SELECT Fk_id_User, Fk_id_Grupo FROM intereses WHERE id_Intereses = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("i", $interes_id);
@@ -32,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $result = $stmt->get_result();
             $interes = $result->fetch_assoc();
 
-            // Verificar si el usuario ya está registrado en el grupo
             $sql_check = "SELECT * FROM alumnos WHERE Fk_id_User = ? AND Fk_Id_Grupo = ?";
             $stmt_check = $conn->prepare($sql_check);
             $stmt_check->bind_param("ii", $interes['Fk_id_User'], $interes['Fk_id_Grupo']);
@@ -42,19 +37,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($result_check->num_rows > 0) {
                 throw new Exception('El usuario ya está registrado en este grupo.');
             } else {
-                // Insertar en la tabla alumnos
                 $sql_insert_alumnos = "INSERT INTO alumnos (Fk_id_User, Fk_Id_Grupo, Status, FechaHoraC) VALUES (?, ?, 1, NOW())";
                 $stmt_insert_alumnos = $conn->prepare($sql_insert_alumnos);
                 $stmt_insert_alumnos->bind_param("ii", $interes['Fk_id_User'], $interes['Fk_id_Grupo']);
                 $stmt_insert_alumnos->execute();
 
-                // Insertar en la tabla inscripciones
                 $sql_insert_inscripciones = "INSERT INTO inscripciones (Fk_id_User, Fk_id_Grupo, FechaHoraC) VALUES (?, ?, NOW())";
                 $stmt_insert_inscripciones = $conn->prepare($sql_insert_inscripciones);
                 $stmt_insert_inscripciones->bind_param("ii", $interes['Fk_id_User'], $interes['Fk_id_Grupo']);
                 $stmt_insert_inscripciones->execute();
 
-                // Actualizar el estado del interés
                 $sql_update_intereses = "UPDATE intereses SET Status = 1 WHERE id_Intereses = ?";
                 $stmt_update_intereses = $conn->prepare($sql_update_intereses);
                 $stmt_update_intereses->bind_param("i", $interes_id);
@@ -63,8 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $conn->commit();
             }
         } elseif ($accion == 'rechazar') {
-            // Actualizar el estado del interés
-            $sql_update_intereses = "UPDATE intereses SET Status = 2 WHERE id_Intereses = ?";
+            $sql_update_intereses = "UPDATE intereses SET Status = 0 WHERE id_Intereses = ?";
             $stmt_update_intereses = $conn->prepare($sql_update_intereses);
             $stmt_update_intereses->bind_param("i", $interes_id);
             $stmt_update_intereses->execute();
@@ -75,21 +66,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 throw new Exception('ID de grupo no válido.');
             }
 
-            
-
-            // Verificar si hay registros relacionados en grupos_finalizados
-            $sql_check_finalizados = "SELECT COUNT(*) as total FROM grupos_finalizados WHERE Fk_id_Grupo = ?";
-            $stmt_check_finalizados = $conn->prepare($sql_check_finalizados);
-            $stmt_check_finalizados->bind_param("i", $grupo_id);
-            $stmt_check_finalizados->execute();
-            $result_check_finalizados = $stmt_check_finalizados->get_result();
-            $row_check_finalizados = $result_check_finalizados->fetch_assoc();
-
-            if ($row_check_finalizados['total'] > 0) {
-                throw new Exception('Error al eliminar el grupo.');
-            }
-
-            // Mover grupo a la tabla grupos_finalizados
             $sql_move_to_finalizados = "INSERT INTO grupos_finalizados (Fk_id_Curso, Fk_id_Grupo, NombreCurso, FechaInicio, FechaFin, Capacidad, Cupo, ClaveGrupo)
                     SELECT Fk_id_Curso, id_Grupo, c.NombreCurso, FechaI, FechaF, Capacidad, (SELECT COUNT(*) FROM alumnos WHERE Fk_Id_Grupo = g.id_Grupo), ClaveGrupo
                     FROM grupo g
@@ -99,11 +75,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt_move_to_finalizados->bind_param("i", $grupo_id);
             $stmt_move_to_finalizados->execute();
 
-            // Borrar el grupo de la tabla grupo
-            $sql_delete_grupo = "DELETE FROM grupo WHERE id_Grupo = ?";
-            $stmt_delete_grupo = $conn->prepare($sql_delete_grupo);
-            $stmt_delete_grupo->bind_param("i", $grupo_id);
-            $stmt_delete_grupo->execute();
+            $sql_update_grupo = "UPDATE grupo SET Status = 0 WHERE id_Grupo = ?";
+            $stmt_update_grupo = $conn->prepare($sql_update_grupo);
+            $stmt_update_grupo->bind_param("i", $grupo_id);
+            $stmt_update_grupo->execute();
 
             $conn->commit();
         } elseif ($accion == 'cancelar') {
@@ -113,7 +88,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 throw new Exception('ID de grupo no válido.');
             }
 
-            // Actualizar el estado del grupo a inactivo
             $sql_update_grupo = "UPDATE grupo SET Status = 0 WHERE id_Grupo = ?";
             $stmt_update_grupo = $conn->prepare($sql_update_grupo);
             $stmt_update_grupo->bind_param("i", $grupo_id);
@@ -142,7 +116,6 @@ function getGroupNumber($id) {
     return $id;
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="es">
@@ -182,9 +155,9 @@ function getGroupNumber($id) {
         
         // Consulta para obtener los grupos con paginación
         $sql = "SELECT g.id_Grupo, g.ClaveGrupo, g.Capacidad, g.FechaI, g.FechaF, c.NombreCurso 
-                FROM grupo g
-                JOIN curso c ON g.Fk_id_Curso = c.id_Curso
-                LIMIT $limit OFFSET $offset";
+        FROM grupo g
+        JOIN curso c ON g.Fk_id_Curso = c.id_Curso
+        WHERE g.Status = 1 ";
         $result = $conn->query($sql);
 
         if ($result->num_rows > 0) {
@@ -253,7 +226,7 @@ function getGroupNumber($id) {
                             </div>
                             <div class='modal-body'>";
 
-                $studentsSql = "SELECT u.vNombre 
+                $studentsSql = "SELECT u.vNombre, u.vApellidoP 
                                 FROM alumnos a
                                 JOIN user u ON a.Fk_id_User = u.id_User
                                 WHERE a.Fk_Id_Grupo = ?";
@@ -286,7 +259,7 @@ function getGroupNumber($id) {
                             </div>
                             <div class='modal-body'>";
 
-                $applicationsSql = "SELECT u.vNombre, i.id_Intereses
+                $applicationsSql = "SELECT u.vNombre, u.vApellidoP, i.id_Intereses
                                     FROM intereses i
                                     JOIN user u ON i.Fk_id_User = u.id_User
                                     WHERE i.Fk_id_Grupo = ? AND i.Status = 1";

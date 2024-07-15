@@ -1,21 +1,23 @@
-<?php
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nombre = $_POST['Nombre'];
-    $correo = $_POST['CorreoElectronico'];
-    $asunto = $_POST['Asunto'];
-    $mensaje = $_POST['Mensaje'];
 
-    $to = "a20220356@utem.edu.mx";
-    $subject = "Nuevo mensaje de contacto: " . $asunto;
-    $body = "Nombre: $nombre\nCorreo Electrónico: $correo\nAsunto: $asunto\nMensaje:\n$mensaje";
-    $headers = "From: $correo";
+<?php
+
+require 'modelo/conexion.php';
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $nombre = htmlspecialchars($_POST['nombre']);
+    $email = htmlspecialchars($_POST['email']);
+    $asunto = htmlspecialchars($_POST['asunto']);
+    $mensaje = htmlspecialchars($_POST['mensaje']);
+
+    $to = "a20220356@utem.edu.mx"; // Reemplaza con tu correo personal
+    $subject = "Nuevo mensaje de contacto: $asunto";
+    $body = "Nombre: $nombre\nCorreo: $email\n\nMensaje:\n$mensaje";
+    $headers = "From: $email";
 
     if (mail($to, $subject, $body, $headers)) {
-        echo "Mensaje enviado exitosamente.";
+        echo "<script>alert('Mensaje enviado correctamente.'); window.location.href='index.php';</script>";
     } else {
-        echo "Hubo un error al enviar el mensaje.";
+        echo "<script>alert('Error al enviar el mensaje.'); window.location.href='index.php';</script>";
     }
-} else {
-    header('Location: '); 
+
 }
 ?>

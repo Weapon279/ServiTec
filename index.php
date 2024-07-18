@@ -95,7 +95,7 @@ $totalServicios = $stmtServicios->fetch(PDO::FETCH_ASSOC)['totalServicios'];
 
 
   // Obtener conteo de clientes satisfechos
-  $sqlClientes = "SELECT COUNT(DISTINCT Fk_id_user) AS totalClientes FROM diplomas";
+  $sqlClientes = "SELECT COUNT(DISTINCT Fk_id_Grupo) AS totalClientes FROM diplomas";
   $stmtClientes = $conn->prepare($sqlClientes);
   $stmtClientes->execute();
   $totalClientes = $stmtClientes->fetch(PDO::FETCH_ASSOC)['totalClientes'];
@@ -106,7 +106,7 @@ $totalServicios = $stmtServicios->fetch(PDO::FETCH_ASSOC)['totalServicios'];
 ?>
 <?php
 $directory = 'dashboard/img/';
-$images = glob($directory . '*.{png,jpg,webp,web,jpeg,png,gif}', GLOB_BRACE);
+$images = glob($directory . '*.{jpg,webp,web,jpeg,png,gif}', GLOB_BRACE);
 ?>
 
 <?php include 'modelo/conexion.php';?>
@@ -513,8 +513,8 @@ $conn = null;
     <?php foreach ($cursos as $curso) { ?>
       <div class="w3-col l3 m6 w3-margin-bottom">
         <div class="w3-card">
-          <img src="<?php echo htmlspecialchars($curso['ImagenCurso'] ?? 'default.jpg'); ?>" alt="<?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?>" style="width:100%">
-          <div class="w3-container">
+        <img src="dashboard/img/<?php echo $curso['ImagenCurso']; ?>" alt="<?php echo $curso['NombreCurso']; ?>" style="width:100%">
+        <div class="w3-container">
             <h3><?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?></h3>
             <p><?php echo htmlspecialchars($curso['DescripcionCurso'] ?? ''); ?></p>
             <p>Docente: <?php echo htmlspecialchars($curso['NombreDoc'] ?? ''); ?></p>
@@ -565,7 +565,7 @@ $conn = null;
   <?php if (!empty($cursosD)) { ?>
     <?php foreach ($cursosD as $curso) { ?>
       <div class="w3-col l3 m6 w3-margin-bottom">
-      <img src="<?php echo htmlspecialchars($curso['ImagenCurso'] ?? 'default.jpg'); ?>" alt="<?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?>" style="width:100%">        <div class="w3-card">
+      <img src="<?php echo htmlspecialchars($curso['ImagenCurso'] ?? 'default.png'); ?>" alt="<?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?>" style="width:100%">        <div class="w3-card">
           <div class="w3-container">
             <h3><?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?></h3>
             <p><?php echo htmlspecialchars($curso['DescripcionCurso'] ?? ''); ?></p>
@@ -598,7 +598,7 @@ $conn = null;
 
 
 
-<!-- Paquetes -->
+<!-- Paquetes
 <div class="w3-container w3-center w3-dark-grey" style="padding:128px 16px" id="pricing">
   <h3>PAQUETES</h3>
   <p class="w3-large">Todo para tu equipo de trabajo.</p>
@@ -648,27 +648,27 @@ $conn = null;
   </div>
 </div>
 
-<!-- Fin Paquetes -->
+ Fin Paquetes -->
 
 
 <!-- Contacto -->
 <div class="w3-container w3-light-grey" style="padding:128px 16px" id="contacto">
     <h3 class="w3-center">CONTACTO</h3>
     <p class="w3-center w3-large">Mantengámonos en contacto. Mandanos un mensaje:</p>
-        <br>
-        <form action="contacto.php" method="POST">
-            <p><input class="w3-input w3-border" type="text" placeholder="Nombre" required name="Nombre"></p>
-            <p><input class="w3-input w3-border" type="email" placeholder="Correo Electrónico" required name="CorreoElectronico"></p>
-            <p><input class="w3-input w3-border" type="text" placeholder="Asunto" required name="Asunto"></p>
-            <p><textarea class="w3-input w3-border" placeholder="Mensaje" required name="Mensaje"></textarea></p>
-            <p>
-                <button class="w3-button w3-green-custom" type="submit">
-                    <i class="fa fa-paper-plane"></i> ENVIAR MENSAJE
-                </button>
-            </p>
-        </form>
-    </div>
+    <br>
+    <form action="contacto.php" method="POST">
+        <p><input class="w3-input w3-border" type="text" placeholder="Nombre" required name="Nombre"></p>
+        <p><input class="w3-input w3-border" type="email" placeholder="Correo Electrónico" required name="CorreoElectronico"></p>
+        <p><input class="w3-input w3-border" type="text" placeholder="Asunto" required name="Asunto"></p>
+        <p><textarea class="w3-input w3-border" placeholder="Mensaje" required name="Mensaje"></textarea></p>
+        <p>
+            <button class="w3-button w3-green-custom" type="submit">
+                <i class="fa fa-paper-plane"></i> ENVIAR MENSAJE
+            </button>
+        </p>
+    </form>
 </div>
+
     <!-- fin Contacto --> 
 
 <!-- Footer -->

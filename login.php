@@ -123,6 +123,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="text-center">
                     <span class="psw">¿No tienes cuenta? <a href="registro.php">Registrarte</a></span>
                 </div>
+                <div class="text-center">
+                    <span class="psw">Regresar al <a href="index.php">Inicio</a></span>
+                </div>
             </form>
         </div>
     </div>

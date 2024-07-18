@@ -11,7 +11,11 @@ $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1; // Obtener el núme
 $inicio = ($pagina - 1) * $porPagina;
 
 // Contar el total de registros
-$sqlCount = "SELECT COUNT(*) as total FROM curso c JOIN grupo g ON c.id_Curso = g.Fk_id_Curso WHERE c.Status IN ('Disponible', 'Falta Informacion')";
+$sqlCount = "SELECT COUNT(*) as total 
+             FROM curso c 
+             JOIN grupo g ON c.id_Curso = g.Fk_id_Curso 
+             WHERE c.Status IN ('Disponible', 'Falta Informacion') 
+             AND g.Status = 1"; // Asegurarse de que el grupo está activo
 $resultCount = $conn->query($sqlCount);
 $totalRegistros = $resultCount->fetch_assoc()['total'];
 $totalPaginas = ceil($totalRegistros / $porPagina);
@@ -22,6 +26,7 @@ $sql = "SELECT c.id_Curso, g.id_Grupo, c.NombreCurso, c.ObjectivoCurso, c.Modali
         FROM curso c
         JOIN grupo g ON c.id_Curso = g.Fk_id_Curso
         WHERE c.Status IN ('Disponible', 'Falta Informacion')
+        AND g.Status = 1
         LIMIT ?, ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("ii", $inicio, $porPagina);
@@ -68,8 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['join_group'])) {
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-    <!-- Margen de tabla y menu lateral -->
-    <div class="w3-main" style="margin-left:320px;margin-top:60px;">
+<!-- Margen de tabla y menu lateral -->
+<div class="w3-main" style="margin-left:320px;margin-top:60px;">
 <!--Fin de margen -->
 
 <style>

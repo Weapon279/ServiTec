@@ -54,7 +54,7 @@
             <input type="number" class="form-control" id="costo" name="costo" required>
         </div>
         <div class="mb-3">
-            <label for="claveGrupo" class="form-label">Clave del Grupo</label>
+            <label for="claveGrupo"  title='Recomendacion de registro Curso= Tipo de servicio IS=Ingeneria de software 001= ID del servicio 2024= Año en curso "CIS001-2024"' class="form-label">Clave del Grupo</label>
             <input type="text" class="form-control" id="claveGrupo" name="claveGrupo" required>
         </div>
         <div class="mb-3">

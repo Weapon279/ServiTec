@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 throw new Exception('ID de grupo no válido.');
             }
 
-            $sql_move_to_finalizados = "INSERT INTO grupos_finalizados (Fk_id_Curso, Fk_id_Grupo, NombreCurso, FechaInicio, FechaFin, Capacidad, Cupo, ClaveGrupo)
+            $sql_move_to_finalizados = "INSERT INTO grupos_finalizados (Fk_id_Curso, Fk_id_Grupo, NombreCurso,  FechaInicio, FechaFin, Capacidad, Cupo, ClaveGrupo)
                     SELECT Fk_id_Curso, id_Grupo, c.NombreCurso, FechaI, FechaF, Capacidad, (SELECT COUNT(*) FROM alumnos WHERE Fk_Id_Grupo = g.id_Grupo), ClaveGrupo
                     FROM grupo g
                     JOIN curso c ON g.Fk_id_Curso = c.id_Curso
@@ -314,11 +314,11 @@ function getGroupNumber($id) {
                                 </div>
                                 <div class='mb-3'>
                                   <label for='fechaI' class='form-label'>Fecha de Inicio</label>
-                                  <input type='date' class='form-control' id='fechaI' name='fechaI' value='{$row['FechaI']}'>
+                                  <input type='datetime' class='form-control' id='fechaI' name='fechaI' value='{$row['FechaI']}'>
                                 </div>
                                 <div class='mb-3'>
                                   <label for='fechaF' class='form-label'>Fecha de Fin</label>
-                                  <input type='date' class='form-control' id='fechaF' name='fechaF' value='{$row['FechaF']}'>
+                                  <input type='datetime-local' class='form-control' id='fechaF' name='fechaF' value='{$row['FechaF']}'>
                                 </div>
                                 <button type='submit' class='btn btn-primary'>Guardar Cambios</button>
                               </form>
@@ -409,6 +409,7 @@ echo "          </div>
             echo "<p>No se encontraron grupos.</p>";
         }
 
+        
         // Consulta para obtener los grupos finalizados
         $sqlFinalizados = "SELECT g.ClaveGrupo, g.FechaF, c.NombreCurso, g.Capacidad 
                            FROM grupos_finalizados gf

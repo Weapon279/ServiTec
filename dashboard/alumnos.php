@@ -143,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['userId'])) {
                     </div>
                     <div class="mb-3">
                         <label for="editUserWhatsApp" class="form-label">WhatsApp</label>
-                        <input type="text" class="form-control" name="nWhats" id="editUserWhatsApp" required>
+                        <input type="number" class="form-control" name="nWhats" id="editUserWhatsApp" required>
                     </div>
                     <div class="mb-3">
                         <label for="editUserPass" class="form-label">Contraseña</label>

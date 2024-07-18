@@ -12,8 +12,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $Fk_TypeUser = 1;
     $bStatus = 'Activo'; 
 
-    if (!is_numeric($nWhats) || $nWhats < 0 || $nWhats > 9223372036854775807) {
-        echo "Número de WhatsApp no válido.";
+    if (!is_numeric($nWhats) || $nWhats < 0 || $nWhats > 9999999999) {
+        echo "<script>
+        document.addEventListener('DOMContentLoadede', function() {
+            document.getElementById('modale').style.display = 'block';
+            setTimeout(function() {
+                window.location.href = 'registro.php';
+            }, 2000);
+        });
+      </script>";
         exit();
     }
 
@@ -226,11 +233,44 @@ body {
             <p>Usuario registrado con éxito. Inicia sesión</p>
         </div>
     </div>
+        <!-- Modal -->
+        <div id="modale" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>Error al registrar Numero de celular</p>
+        </div>
+    </div>
 
     <script>
         // Script para cerrar el modal y redirigir después de 2 segundos
         document.addEventListener('DOMContentLoaded', function() {
             var modal = document.getElementById('modal');
+            var span = document.getElementsByClassName('close')[0];
+
+            if (modal.style.display == 'block') {
+                setTimeout(function() {
+                    modal.style.display = 'none';
+                    window.location.href = 'login.php';
+                }, 2000);
+            }
+
+            // Cuando el usuario hace clic en <span> (x), cierra el modal
+            span.onclick = function() {
+                modal.style.display = 'none';
+            }
+
+            // Cuando el usuario hace clic fuera del modal, lo cierra
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            }
+        });
+    </script>
+        <script>
+        // Script para cerrar el modal y redirigir después de 2 segundos
+        document.addEventListener('DOMContentLoadede', function() {
+            var modal = document.getElementById('modale');
             var span = document.getElementsByClassName('close')[0];
 
             if (modal.style.display == 'block') {

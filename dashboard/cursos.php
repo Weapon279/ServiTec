@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                   // Insertar nuevo grupo
                   $sqlGrupo = "INSERT INTO grupo (Fk_id_Curso, ClaveGrupo, FechaI, FechaF, Capacidad, Status, FechaHoraC, FechaHoraA) 
-                               VALUES ($courseId, '$nombreGrupo', '$fechaInicio', '$fechaFin', 1, 1, '$fechaHoraActual', '$fechaHoraActual')";
+                               VALUES ($courseId, '$nombreGrupo', '$fechaInicio', '$fechaFin', 25, 1, '$fechaHoraActual', '$fechaHoraActual')";
               
                   if ($conn->query($sqlCurso) === TRUE && $conn->query($sqlGrupo) === TRUE) {
                       echo "Curso lanzado correctamente.";
@@ -143,10 +143,10 @@ $result = $conn->query($sql);
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="bg-light">
-<div class="w3-main" style="margin-left:300px;margin-top:43px;">
 
-  <div class="container mt-5">
-  <h2>Gestión de Servicios</h2>
+<div class="w3-main" style="margin-left:300px;margin-top:43px;">
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Servicios</h1>
   <table class="table table-striped">
     <thead>
       <tr>
@@ -174,46 +174,45 @@ $result = $conn->query($sql);
 
           echo "<tr>
                   <td><a href='#' data-bs-toggle='modal' data-bs-target='#alumnosModal{$courseId}' 
-                      title='Ver Alumnos Registrados'>{$row['NombreCurso']}</a></td>
+                      title='Ver Grupos Registrados'>{$row['NombreCurso']}</a></td>
                   <td>{$row['Modalidad']}</td>
                   <td>{$row['DescripcionCurso']}</td>
                   <td>{$row['ObjectivoCurso']}</td>
                   <td>{$row['ConocimientosCurso']}</td>
                   <td>{$row['DocenteConvoca']}</td>
                   <td>{$row['CostoCurso']}</td>
-                  <td><button class='btn btn-info' data-bs-toggle='modal' data-bs-target='#actividadModal{$courseId}'><i class='fa fa-play'></i></button></td>
+                  <td><button class='btn btn-info' data-bs-toggle='modal' title='Dar de alta Grupo' data-bs-target='#actividadModal{$courseId}'><i class='fa fa-play'></i></button></td>
                   <td><span class='badge bg-" . ($status === "Disponible" ? "success" : ($status === "Cancelado" ? "danger" : ($status === "Suspender" ? "warning" : "info"))) . "'>{$status}</span></td>
                   <td>
                     <div class='btn-group'>
-                      <button class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#editModal{$courseId}'><i class='fa fa-edit'></i></button>
+                      <button class='btn btn-primary' data-bs-toggle='modal' title='Editar Servicio' data-bs-target='#editModal{$courseId}'><i class='fa fa-edit'></i></button>
                       <form method='post' style='display:inline-block'>
                         <input type='hidden' name='id_Curso' value='{$courseId}'>
                         <input type='hidden' name='action' value='cancel'>
-                        <button type='submit' class='btn btn-danger'><i class='fa fa-trash'></i></button>
-                         
-                        <form method='post' action=''>
+                        <button type='submit' title='Cancelar Servicio' class='btn btn-danger'><i class='fa fa-trash'></i></button>
+                      <form method='post' action=''>
                       <input type='hidden' name='id_Curso' value='{$courseId}'>
                       <input type='hidden' name='action' value='toggle_status'>
                       <input type='hidden' name='status' value='{$status}'>
                         <div class='form-check form-switch'>
-                        <input class='form-check-input' type='checkbox' id='statusSwitch{$courseId}' " . ($status == 'Disponible' ? 'checked' : '') . " onchange='this.form.submit()'>
+                        <input class='form-check-input' title='Activar / Desactivar' type='checkbox' id='statusSwitch{$courseId}' " . ($status == 'Disponible' ? 'checked' : '') . " onchange='this.form.submit()'>
                       </div>
                         </form>
-                      <form method='post' style='display:inline-block'>
-                        <input type='hidden' name='id_Curso' value='{$courseId}'>
-                        <input type='hidden' name='action' value='pause'>
-                        <button type='submit' class='btn btn-warning'><i class='fa fa-pause'></i></button>
-                      </form>
-                      <form method='post' style='display:inline-block'>
-                        <input type='hidden' name='id_Curso' value='{$courseId}'>
-                        <input type='hidden' name='action' value='delete'>
-                        <button type='submit' class='btn btn-secondary'><i class='fa fa-times'></i></button>
-                      </form>
-                      <form method='post' style='display:inline-block'>
-                        <input type='hidden' name='id_Curso' value='{$courseId}'>
-                        <input type='hidden' name='action' value='complete'>
-                        <button type='submit' class='btn btn-success'><i class='fa fa-check'></i></button>
-                      </form>
+                    <form method='post' style='display:inline-block'>
+                      <input type='hidden' name='id_Curso' value='{$courseId}'>
+                      <input type='hidden' name='action' value='pause'>
+                      <button type='submit' class='btn btn-warning' title='Pausar Servicio'><i class='fa fa-pause'></i></button>
+                    </form>
+                    <form method='post' style='display:inline-block'>
+                      <input type='hidden' name='id_Curso' value='{$courseId}'>
+                      <input type='hidden' name='action' value='delete'>
+                      <button type='submit' class='btn btn-secondary' title='Eliminar Servicio'><i class='fa fa-times'></i></button>
+                    </form>
+                    <form method='post' style='display:inline-block'>
+                      <input type='hidden' name='id_Curso' value='{$courseId}'>
+                      <input type='hidden' name='action' value='complete'>
+                      <button type='submit' class='btn btn-success' title='Completar Servicio'><i class='fa fa-check'></i></button>
+                    </form>
                     </div>
                   </td>
                 </tr>";
@@ -223,8 +222,8 @@ $result = $conn->query($sql);
           <div class='modal-dialog'>
             <div class='modal-content'>
               <div class='modal-header'>
-                <h5 class='modal-title' id='editModalLabel'>Editar Curso: {$row['NombreCurso']}</h5>
-                <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+                <h5 class='modal-title'  id='editModalLabel'>Editar Curso: {$row['NombreCurso']}</h5>
+                <button type='submit'  class='btn-close'   data-bs-dismiss='modal'  aria-label='Close'></button>
               </div>
               <div class='modal-body'>
                 <form action='' method='post'>
@@ -290,53 +289,105 @@ $result = $conn->query($sql);
 
 <!-- Modales para alumnos y lanzar curso -->
 <?php
-$result->data_seek(0);
-while($row = $result->fetch_assoc()) {
-  $courseId = $row['id_Curso'];
 
-  // Modal para ver alumnos registrados
-  echo "<div class='modal fade' id='alumnosModal{$courseId}' tabindex='-1' aria-labelledby='alumnosModalLabel' aria-hidden='true'>
+
+  // Modal para ver Grupos
+
+  // Obtener cursos
+  $sqlCursos = "SELECT id_Curso, NombreCurso FROM curso";
+  $resultCursos = $conn->query($sqlCursos);
+  
+  while ($row = $resultCursos->fetch_assoc()) {
+      $courseId = $row['id_Curso'];
+      $sqlGrupos = "SELECT ClaveGrupo, FechaI, FechaF FROM grupo WHERE Fk_id_Curso = ?";
+      $stmtGrupos = $conn->prepare($sqlGrupos);
+      $stmtGrupos->bind_param("i", $courseId);
+      $stmtGrupos->execute();
+      $resultGrupos = $stmtGrupos->get_result();
+      ?>
+  
+      <!-- Modal para mostrar los grupos disponibles para el curso -->
+      <div class='modal fade' id='alumnosModal<?php echo $courseId; ?>' tabindex='-1' aria-labelledby='alumnosModalLabel' aria-hidden='true'>
           <div class='modal-dialog'>
-            <div class='modal-content'>
-              <div class='modal-header'>
-                <h5 class='modal-title' id='alumnosModalLabel'>Alumnos Registrados en {$row['NombreCurso']}</h5>
-                <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+              <div class='modal-content'>
+                  <div class='modal-header'>
+                      <h5 class='modal-title' id='alumnosModalLabel'>Grupos Registrados en <?php echo $row['NombreCurso']; ?></h5>
+                      <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+                  </div>
+                  <div class='modal-body'>
+                      <?php if ($resultGrupos->num_rows > 0): ?>
+                          <ul class='list-group'>
+                              <?php while ($grupo = $resultGrupos->fetch_assoc()): ?>
+                                  <li class='list-group-item'>
+                                      <strong>Clave del Grupo:</strong> <?php echo $grupo['ClaveGrupo']; ?><br>
+                                      <strong>Fecha de Inicio:</strong> <?php echo $grupo['FechaI']; ?><br>
+                                      <strong>Fecha de Finalización:</strong> <?php echo $grupo['FechaF']; ?>
+                                  </li>
+                              <?php endwhile; ?>
+                          </ul>
+                      <?php else: ?>
+                          <p>El Curso no cuenta con grupos registrados...</p>
+                      <?php endif; ?>
+                  </div>
               </div>
-              <div class='modal-body'>
-                <p>El Curso no cuenta con grupos registrados...</p>
-              </div>
-            </div>
           </div>
-        </div>";
+      </div>
+  
+      <?php
+      $stmtGrupos->close();
+  }
+  
 
- // Modal para lanzar curso
- echo "<div class='modal fade' id='actividadModal{$courseId}' tabindex='-1' aria-labelledby='actividadModalLabel' aria-hidden='true'>
- <div class='modal-dialog'>
-   <div class='modal-content'>
-     <div class='modal-header'>
-       <h5 class='modal-title' id='actividadModalLabel'>Lanzar Curso: {$row['NombreCurso']}</h5>
-       <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
-     </div>
-     <div class='modal-body'>
-       <form action='' method='post'>
-         <input type='hidden' name='id_Curso' value='{$courseId}'>
-         <input type='hidden' name='action' value='launch'>
-         <div class='mb-3'>
-           <label for='fechaInicio' class='form-label'>Fecha de Inicio</label>
-           <input type='datetime-local' class='form-control' id='fechaInicio' name='fechaInicio' required>
-         </div>
-         <div class='mb-3'>
-           <label for='fechaFin' class='form-label'>Fecha de Fin</label>
-           <input type='datetime-local' class='form-control' id='fechaFin' name='fechaFin' required>
-         </div>
-         <button type='submit' class='btn btn-primary'>Lanzar</button>
-       </form>
-     </div>
-   </div>
- </div>
-</div>";
-}
-?>
+        
+
+  
+  require 'conexion.php';
+  
+  // Obtener cursos
+  $sqlCursos = "SELECT id_Curso, NombreCurso FROM curso";
+  $resultCursos = $conn->query($sqlCursos);
+  
+  if ($resultCursos->num_rows > 0) {
+      while ($row = $resultCursos->fetch_assoc()) {
+          $courseId = $row['id_Curso'];
+          $courseName = $row['NombreCurso'];
+  
+          // Verifica que courseId y courseName no sean nulos
+          if (isset($courseId) && isset($courseName)) {
+              // Modal para lanzar curso
+              echo "<div class='modal fade' id='actividadModal{$courseId}' tabindex='-1' aria-labelledby='alumnosModalLabel' aria-hidden='true'>
+                      <div class='modal-dialog'>
+                          <div class='modal-content'>
+                              <div class='modal-header'>
+                                  <h5 class='modal-title' id='alumnosModalLabel'>Lanzar Curso: {$courseName}</h5>
+                                  <button type='button'  class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+                              </div>
+                              <div class='modal-body'>
+                                  <form action='' method='post'>
+                                      <input type='hidden' name='id_Curso' value='{$courseId}'>
+                                      <input type='hidden' name='action' value='launch'>
+                                      <div class='mb-3'>
+                                          <label for='fechaInicio' class='form-label'>Fecha de Inicio</label>
+                                          <input type='datetime-local' class='form-control' id='fechaInicio' name='fechaInicio' required>
+                                      </div>
+                                      <div class='mb-3'>
+                                          <label for='fechaFin' class='form-label'>Fecha de Fin</label>
+                                          <input type='datetime-local' class='form-control' id='fechaFin' name='fechaFin' required>
+                                      </div>
+                                      <button type='submit' class='btn btn-primary'>Lanzar</button>
+                                  </form>
+                              </div>
+                          </div>
+                      </div>
+                  </div>";
+          }
+      }
+  } else {
+      echo "No se encontraron cursos.";
+  }
+  
+  ?>
+  
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

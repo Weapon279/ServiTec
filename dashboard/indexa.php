@@ -38,23 +38,23 @@ function generateMenu($user_type_id, $conn) {
 
     switch ($user_type) {
         case 'Administrativo':
-            $menu .= "<li class='nav-item'><a href='dash.php' class='nav-link'><i class='fas fa-users'></i> Inicio</a></li>";
-            $menu .= "<li class='nav-item'><a href='cursos.php' class='nav-link'><i class='fas fa-users'></i> Servicios</a></li>";
-            $menu .= "<li class='nav-item'><a href='grupo.php' class='nav-link'><i class='fas fa-users'></i> Gestion de grupos</a></li>";
-            $menu .= "<li class='nav-item'><a href='registro_taller.php' class='nav-link'><i class='fas fa-users'></i> Registro de Servicio</a></li>";
-            $menu .= "<li class='nav-item'><a href='noticia.php' class='nav-link'><i class='fas fa-users'></i> Noticias</a></li>";
-            $menu .= "<li class='nav-item'><a href='alumnos.php' class='nav-link'><i class='fas fa-users'></i> Usuarios</a></li>";
-            $menu .= "<li class='nav-item'><a href='diplomas.php' class='nav-link'><i class='fas fa-users'></i> Diplomas</a></li>";
-            break;
-        case 'Alumno':
-            $menu .= "<li class='nav-item'><a href='dashb.php' class='nav-link'><i class='fas fa-user-tie'></i>Inicio</a></li>";
-            $menu .= "<li class='nav-item'><a href='registroc.php' class='nav-link'><i class='fas fa-file-invoice'></i> Inscripcion</a></li>";
-            $menu .= "<li class='nav-item'><a href='diplomasa.php' class='nav-link'><i class='fas fa-user-tie'></i>Diplomas</a></li>";
-            $menu .= "<li class='nav-item'><a href='perfila.php' class='nav-link'><i class='fas fa-user-tie'></i>Perfil</a></li>";
-            break;
-        case 'Aspirante':
-            $menu .= "<li class='nav-item'><a href='registroc.php' class='nav-link'><i class='fas fa-user-tie'></i> Registro de Servicio</a></li>";
-            break;
+                $menu .= "<li class='nav-item'><a href='dash.php' class='nav-link'><i class='fas fa-home'></i> Inicio</a></li>";
+                $menu .= "<li class='nav-item'><a href='cursos.php' class='nav-link'><i class='fas fa-briefcase'></i> Servicios</a></li>";
+                $menu .= "<li class='nav-item'><a href='grupo.php' class='nav-link'><i class='fas fa-users-cog'></i> Gestión de grupos</a></li>";
+                $menu .= "<li class='nav-item'><a href='registro_taller.php' class='nav-link'><i class='fas fa-edit'></i> Registro de Servicio</a></li>";
+                $menu .= "<li class='nav-item'><a href='noticia.php' class='nav-link'><i class='fas fa-newspaper'></i> Noticias</a></li>";
+                $menu .= "<li class='nav-item'><a href='alumnos.php' class='nav-link'><i class='fas fa-user-graduate'></i> Usuarios</a></li>";
+                $menu .= "<li class='nav-item'><a href='diplomas.php' class='nav-link'><i class='fas fa-certificate'></i> Diplomas</a></li>";
+                break;
+            case 'Alumno':
+                $menu .= "<li class='nav-item'><a href='dashb.php' class='nav-link'><i class='fas fa-home'></i> Inicio</a></li>";
+                $menu .= "<li class='nav-item'><a href='registroc.php' class='nav-link'><i class='fas fa-file-signature'></i> Inscripción</a></li>";
+                $menu .= "<li class='nav-item'><a href='diplomasa.php' class='nav-link'><i class='fas fa-certificate'></i> Diplomas</a></li>";
+                $menu .= "<li class='nav-item'><a href='perfila.php' class='nav-link'><i class='fas fa-user'></i> Perfil</a></li>";
+                break;
+            case 'Aspirante':
+                $menu .= "<li class='nav-item'><a href='registroc.php' class='nav-link'><i class='fas fa-user-edit'></i> Registro de Servicio</a></li>";
+                break;
     }
     $menu .= "</ul>";
     return $menu;

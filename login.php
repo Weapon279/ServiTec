@@ -6,50 +6,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $vCorreo = $_POST['vCorreo'];
     $nPass = $_POST['nPass'];
 
-    // Consulta para obtener el usuario y tipo de usuario
-    $stmt = $conn->prepare("SELECT id_User, Fk_TypeUser, vNombre, vApellidoP, vApellidoM, vCorreo, nPass FROM user WHERE vCorreo = :vCorreo");
-    $stmt->bindParam(':vCorreo', $vCorreo);
-    $stmt->execute();
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    try {
+        // Consulta para obtener el usuario y tipo de usuario
+        $stmt = $conn->prepare("SELECT id_User, Fk_TypeUser, vNombre, vApellidoP, vApellidoM, vCorreo, nPass FROM user WHERE vCorreo = :vCorreo");
+        $stmt->bindParam(':vCorreo', $vCorreo);
+        $stmt->execute();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($user && password_verify($nPass, $user['nPass'])) {
-        // Verificar si ya hay una sesión activa
-        $stmt_session = $conn->prepare("SELECT session_id FROM sesion WHERE user_id = :userId");
-        $stmt_session->bindParam(':userId', $user['id_User']);
-        $stmt_session->execute();
-        $active_session = $stmt_session->fetch(PDO::FETCH_ASSOC);
+        if ($user && password_verify($nPass, $user['nPass'])) {
+            // Verificar si ya hay una sesión activa
+            $stmt_session = $conn->prepare("SELECT session_id FROM sesion WHERE user_id = :userId");
+            $stmt_session->bindParam(':userId', $user['id_User']);
+            $stmt_session->execute();
+            $active_session = $stmt_session->fetch(PDO::FETCH_ASSOC);
 
-        if ($active_session) {
-            // Si hay una sesión activa, cerrarla
-            $stmt_delete = $conn->prepare("DELETE FROM sesion WHERE user_id = :userId");
-            $stmt_delete->bindParam(':userId', $user['id_User']);
-            $stmt_delete->execute();
-        }
+            if ($active_session) {
+                $error = "Ya tienes una sesión activa. Cierra la sesión en el otro dispositivo antes de iniciar una nueva.";
+            } else {
+                // Crear una nueva sesión
+                session_regenerate_id(true);
+                $sessionId = session_id();
+                $stmt_insert = $conn->prepare("INSERT INTO sesion (user_id, session_id) VALUES (:userId, :sessionId)");
+                $stmt_insert->bindParam(':userId', $user['id_User']);
+                $stmt_insert->bindParam(':sessionId', $sessionId);
+                $stmt_insert->execute();
 
-        // Crear una nueva sesión
-        session_regenerate_id(true);
-        $sessionId = session_id();
-        $stmt_insert = $conn->prepare("INSERT INTO sesion (user_id, session_id) VALUES (:userId, :sessionId)");
-        $stmt_insert->bindParam(':userId', $user['id_User']);
-        $stmt_insert->bindParam(':sessionId', $sessionId);
-        $stmt_insert->execute();
+                // Establecer las variables de sesión
+                $_SESSION['userId'] = $user['id_User'];
+                $_SESSION['username'] = $user['vNombre'];
+                $_SESSION['userType'] = $user['Fk_TypeUser'];
 
-        // Establecer las variables de sesión
-        $_SESSION['userId'] = $user['id_User'];
-        $_SESSION['username'] = $user['vNombre'];
-        $_SESSION['userType'] = $user['Fk_TypeUser'];
-
-        // Redirigir al dashboard según el tipo de usuario
-        if ($user['Fk_TypeUser'] == 4) {
-            header("Location: dashboard/dashb.php");
-        } elseif ($user['Fk_TypeUser'] == 3) {
-            header("Location: dashboard/dash.php");
+                // Redirigir al dashboard según el tipo de usuario
+                if ($user['Fk_TypeUser'] == 4) {
+                    header("Location: dashboard/dashb.php");
+                } elseif ($user['Fk_TypeUser'] == 3) {
+                    header("Location: dashboard/dash.php");
+                } else {
+                    header("Location: dashboard/dashb.php");
+                }
+                exit();
+            }
         } else {
-            header("Location: dashboard/dashb.php");
+            $error = "Correo o contraseña incorrectos";
         }
+    } catch (PDOException $e) {
+        header("Location: error.php");
         exit();
-    } else {
-        $error = "Correo o contraseña incorrectos";
     }
 }
 ?>
@@ -63,7 +65,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
-
 <style>
     /* Ajustes generales para el body */
     body {
@@ -130,6 +131,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="logout.js"></script>
 </body>
 </html>

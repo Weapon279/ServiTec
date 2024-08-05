@@ -562,24 +562,25 @@ $conn = null;
   <p class="w3-center w3-large">Cursos de calidad para gente de calidad</p>
 
   <div class="w3-row-padding" style="margin-top:64px">
-  <?php if (!empty($cursosD)) { ?>
-    <?php foreach ($cursosD as $curso) { ?>
-      <div class="w3-col l3 m6 w3-margin-bottom">
-      <img src="<?php echo htmlspecialchars($curso['ImagenCurso'] ?? 'default.png'); ?>" alt="<?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?>" style="width:100%">        <div class="w3-card">
-          <div class="w3-container">
-            <h3><?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?></h3>
-            <p><?php echo htmlspecialchars($curso['DescripcionCurso'] ?? ''); ?></p>
-            <p>Docente: <?php echo htmlspecialchars($curso['DocenteConvoca'] ?? ''); ?></p>
-            <p>Modalidad: <?php echo htmlspecialchars($curso['Modalidad'] ?? ''); ?></p>
-            <p>Costo: $<?php echo htmlspecialchars($curso['CostoCurso'] ?? ''); ?></p>
-            <p><a href="login.php" class="w3-button w3-green-custom w3-block"><i class="fa fa-user"> </i> ¡Registrarme ahora!</a></p>
+    <?php if (!empty($cursosD)) { ?>
+      <?php foreach ($cursosD as $curso) { ?>
+        <div class="w3-col l3 m6 w3-margin-bottom">
+          <div class="w3-card">
+            <img src="<?php echo htmlspecialchars($curso['ImagenCurso'] ?? 'dashboard/img/'); ?>" alt="<?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?>" style="width:100%">
+            <div class="w3-container">
+              <h3><?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?></h3>
+              <p><?php echo htmlspecialchars($curso['DescripcionCurso'] ?? ''); ?></p>
+              <p>Docente: <?php echo htmlspecialchars($curso['DocenteConvoca'] ?? ''); ?></p>
+              <p>Modalidad: <?php echo htmlspecialchars($curso['Modalidad'] ?? ''); ?></p>
+              <p>Costo: $<?php echo htmlspecialchars($curso['CostoCurso'] ?? ''); ?></p>
+              <p><a href="login.php" class="w3-button w3-green-custom w3-block"><i class="fa fa-user"> </i> ¡Registrarme ahora!</a></p>
+            </div>
           </div>
         </div>
-      </div>
+      <?php } ?>
+    <?php } else { ?>
+      <p class="w3-center">No hay cursos disponibles.</p>
     <?php } ?>
-  <?php } else { ?>
-    <p class="w3-center">No hay cursos disponibles en este momento.</p>
-  <?php } ?>
   </div>
 </div>
 

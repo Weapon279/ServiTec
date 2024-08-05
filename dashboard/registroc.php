@@ -33,33 +33,50 @@ $stmt->bind_param("ii", $inicio, $porPagina);
 $stmt->execute();
 $result = $stmt->get_result();
 
+$mostrarModal = false;
+$mensajeModal = '';
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['join_group'])) {
     $curso_id = $_POST['curso_id'];
     $grupo_id = $_POST['grupo_id'];
 
-    $conn->begin_transaction();
+    // Verificar si el usuario ya está registrado en el grupo
+    $sqlVerificar = "SELECT * FROM intereses WHERE Fk_id_User = ? AND Fk_id_Curso = ? AND Fk_id_Grupo = ?";
+    $stmtVerificar = $conn->prepare($sqlVerificar);
+    $stmtVerificar->bind_param("iii", $usuario_id, $curso_id, $grupo_id);
+    $stmtVerificar->execute();
+    $resultadoVerificar = $stmtVerificar->get_result();
 
-    try {
-        // Insertar el interés del aspirante en la tabla intereses con Status activo
-        $sql = "INSERT INTO intereses (Fk_id_User, Fk_id_Curso, Fk_id_Grupo, Status, FechaHoraC) VALUES (?, ?, ?, 1, NOW())";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iii", $usuario_id, $curso_id, $grupo_id);
-        $stmt->execute();
-
-        // Enviar una notificación al administrador
-        $mensaje = "Nuevo aspirante registrado para el curso ID: $curso_id en el grupo ID: $grupo_id";
-        $tipo = "registro_grupo";
-        $noti_sql = "INSERT INTO notificaciones (Tipo, Mensaje) VALUES (?, ?)";
-        $noti_stmt = $conn->prepare($noti_sql);
-        $noti_stmt->bind_param("ss", $tipo, $mensaje);
-        $noti_stmt->execute();
-
-        $conn->commit();
-        // Marcamos que se debe mostrar el modal
+    if ($resultadoVerificar->num_rows > 0) {
+        // Usuario ya está registrado en el grupo
         $mostrarModal = true;
-    } catch (Exception $e) {
-        $conn->rollback();
-        echo "Error al registrar el interés: " . $e->getMessage();
+        $mensajeModal = "Ya estás registrado en el grupo.";
+    } else {
+        $conn->begin_transaction();
+
+        try {
+            // Insertar el interés del aspirante en la tabla intereses con Status activo
+            $sql = "INSERT INTO intereses (Fk_id_User, Fk_id_Curso, Fk_id_Grupo, Status, FechaHoraC) VALUES (?, ?, ?, 1, NOW())";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("iii", $usuario_id, $curso_id, $grupo_id);
+            $stmt->execute();
+
+            // Enviar una notificación al administrador
+            $mensaje = "Nuevo aspirante registrado para el curso ID: $curso_id en el grupo ID: $grupo_id";
+            $tipo = "registro_grupo";
+            $noti_sql = "INSERT INTO notificaciones (Fk_id_User, Tipo, Mensaje) VALUES ($usuario_id, ?, ?)";
+            $noti_stmt = $conn->prepare($noti_sql);
+            $noti_stmt->bind_param("ss", $tipo, $mensaje);
+            $noti_stmt->execute();
+
+            $conn->commit();
+            // Marcamos que se debe mostrar el modal
+            $mostrarModal = true;
+            $mensajeModal = "Solicitud enviada correctamente.";
+        } catch (Exception $e) {
+            $conn->rollback();
+            echo "Error al registrar el interés: " . $e->getMessage();
+        }
     }
 }
 ?>
@@ -73,51 +90,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['join_group'])) {
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-<!-- Margen de tabla y menu lateral -->
-<div class="w3-main" style="margin-left:320px;margin-top:60px;">
-<!--Fin de margen -->
-
-<style>
-/* Estilo para el modal */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
-    padding-top: 60px;
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: 5% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 500px;
-    border-radius: 10px;
-    text-align: center;
-}
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
-</style>
 <body>
+<div class="w3-main" style="margin-left:300px;margin-top:43px;">
+
 <div class="container mt-5">
     <h1 class="text-center mb-4">Registro de Aspirantes</h1>
     <table class="table mt-5">
@@ -182,6 +157,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['join_group'])) {
         </ul>
     </nav>
 </div>
+
+<!-- Modal -->
+<?php if ($mostrarModal): ?>
+    <div class="modal show" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel"><?php echo $mensajeModal == "Ya estás registrado en el grupo." ? "Registro Duplicado" : "Registro Exitoso"; ?></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <?php echo $mensajeModal; ?>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        <?php if ($mostrarModal): ?>
+            var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+            successModal.show();
+        <?php endif; ?>
+    });
+</script>
 
 </body>
 </html>

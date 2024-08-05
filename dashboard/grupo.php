@@ -1,3 +1,6 @@
+
+
+
 <?php
 include 'indexa.php';
 include 'conexion.php';
@@ -47,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $stmt_insert_inscripciones->bind_param("ii", $interes['Fk_id_User'], $interes['Fk_id_Grupo']);
                 $stmt_insert_inscripciones->execute();
 
-                $sql_update_intereses = "UPDATE intereses SET Status = 1 WHERE id_Intereses = ?";
+                $sql_update_intereses = "UPDATE intereses SET Status = 0 WHERE id_Intereses = ?";
                 $stmt_update_intereses = $conn->prepare($sql_update_intereses);
                 $stmt_update_intereses->bind_param("i", $interes_id);
                 $stmt_update_intereses->execute();
@@ -81,6 +84,53 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt_update_grupo->execute();
 
             $conn->commit();
+
+            if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+              $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
+          
+              try {
+                  if ($accion == 'cancelar') {
+                      $grupo_id = isset($_POST['grupo_id']) ? $_POST['grupo_id'] : null;
+          
+                      if (!$grupo_id) {
+                          throw new Exception('ID de grupo no válido.');
+                      }
+          
+                      $sql_update_grupo = "UPDATE grupo SET FechaHoraA = NOW() WHERE id_Grupo = ?";
+                      $stmt_update_grupo = $conn->prepare($sql_update_grupo);
+                      $stmt_update_grupo->bind_param("i", $grupo_id);
+                      $stmt_update_grupo->execute();
+          
+                      if ($stmt_update_grupo->affected_rows > 0) {
+                          echo "Grupo cancelado exitosamente.";
+                      } else {
+                          echo "Error al cancelar el grupo: " . $conn->error;
+                      }
+          
+                      $stmt_update_grupo->close();
+                  }
+          
+                  header("Location: grupo.php");
+                  exit();
+              } catch (Exception $e) {
+                  $conn->rollback();
+                  $error_message = $e->getMessage();
+              }
+          }
+          
+          function getGroupLetter($id) {
+              $letters = '';
+              while ($id > 0) {
+                  $mod = ($id - 1) % 26;
+                  $letters = chr(65 + $mod) . $letters;
+                  $id = (int)(($id - $mod) / 26);
+              }
+              return $letters;
+          }
+          
+          function getGroupNumber($id) {
+              return $id;
+          }
         } elseif ($accion == 'cancelar') {
             $grupo_id = isset($_POST['grupo_id']) ? $_POST['grupo_id'] : null;
 
@@ -124,6 +174,12 @@ function getGroupNumber($id) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <title>Grupos</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+
 </head>
 <body>
 <div class="w3-main" style="margin-left:300px;margin-top:43px;">
@@ -131,85 +187,87 @@ function getGroupNumber($id) {
         <h1 class="text-center mb-4">Grupos</h1>
         <?php
         if (!empty($error_message)) {
-            echo "<div class='modal fade' id='errorModal' tabindex='-1' aria-labelledby='errorModalLabel' aria-hidden='true'>
-                    <div class='modal-dialog'>
-                      <div class='modal-content'>
-                        <div class='modal-header'>
-                          <h5 class='modal-title' id='errorModalLabel'>Error</h5>
-                          <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
-                        </div>
-                        <div class='modal-body'>
-                          <p>{$error_message}</p>
-                        </div>
-                        <div class='modal-footer'>
-                          <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Cerrar</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>";
-            echo "<script>
-                    var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-                    errorModal.show();
-                  </script>";
-        }
-        
-        // Consulta para obtener los grupos con paginación
-        $sql = "SELECT g.id_Grupo, g.ClaveGrupo, g.Capacidad, g.FechaI, g.FechaF, c.NombreCurso 
-        FROM grupo g
-        JOIN curso c ON g.Fk_id_Curso = c.id_Curso
-        WHERE g.Status = 1 ";
-        $result = $conn->query($sql);
+          echo "<div class='modal fade' id='errorModal' tabindex='-1' aria-labelledby='errorModalLabel' aria-hidden='true'>
+          <div class='modal-dialog'>
+            <div class='modal-content'>
+              <div class='modal-header'>
+                <h5 class='modal-title' id='errorModalLabel'>Error</h5>
+                <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+              </div>
+              <div class='modal-body'>
+                <p>{$error_message}</p>
+              </div>
+              <div class='modal-footer'>
+                <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Cerrar</button>
+              </div>
+            </div>
+          </div>
+        </div>";
+  echo "<script>
+          var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+          errorModal.show();
+        </script>";
+}
 
-        if ($result->num_rows > 0) {
-            echo "<table class='table table-striped'>
-                    <thead>
-                        <tr>
-                            <th>Clave del Grupo</th>
-                            <th>Nombre del Curso</th>
-                            <th>Capacidad</th>
-                            <th>Fecha de Inicio</th>
-                            <th>Fecha de Fin</th>
-                            <th>Alumnos</th>
-                            <th>Aspirantes</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>";
+// Consulta para obtener los grupos con paginación
+$sql = "SELECT g.id_Grupo, g.ClaveGrupo, g.Capacidad, g.FechaI, g.FechaF, c.NombreCurso 
+      FROM grupo g
+      JOIN curso c ON g.Fk_id_Curso = c.id_Curso
+      WHERE g.Status = 1";
+$result = $conn->query($sql);
 
-            while ($row = $result->fetch_assoc()) {
-                $groupId = $row['id_Grupo'];
-                $groupLetter = getGroupLetter($groupId);
-                $groupNumber = getGroupNumber($groupId);
+if ($result->num_rows > 0) {
+  echo "<table class='table table-striped'>
+          <thead>
+              <tr>
+                  <th>Clave del Grupo</th>
+                  <th>Nombre del Curso</th>
+                  <th>Capacidad</th>
+                  <th>Fecha de Inicio</th>
+                  <th>Fecha de Fin</th>
+                  <th>Alumnos</th>
+                  <th>Aspirantes</th>
+                  <th>Acciones</th>
+              </tr>
+          </thead>
+          <tbody>";
 
-                // Contar el número de alumnos en el grupo
-                $sqlCount = "SELECT COUNT(*) as count FROM alumnos WHERE Fk_Id_Grupo = ?";
-                $stmtCount = $conn->prepare($sqlCount);
-                $stmtCount->bind_param("i", $groupId);
-                $stmtCount->execute();
-                $resultCount = $stmtCount->get_result();
-                $count = $resultCount->fetch_assoc()['count'];
+  while ($row = $result->fetch_assoc()) {
+      $groupId = $row['id_Grupo'];
+      $groupLetter = getGroupLetter($groupId);
+      $groupNumber = getGroupNumber($groupId);
 
-                echo "<tr>
-                        <td>{$groupNumber} ({$groupLetter})</td>
-                        <td>{$row['NombreCurso']}</td>
-                        <td>{$count}/{$row['Capacidad']}</td>
-                        <td>{$row['FechaI']}</td>
-                        <td>{$row['FechaF']}</td>
-                        <td><button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#alumnosModal{$groupId}'>Ver Alumnos</button></td>
-                        <td><button type='button' class='btn btn-primary btn-sm' data-bs-toggle='modal' data-bs-target='#aspirantesModal{$groupId}'>Ver Aspirantes</button></td>
-                        <td>
-                            <button type='button' class='btn btn-warning' data-bs-toggle='modal' data-bs-target='#editarModal{$groupId}'>Editar</button>
-                            <button type='button' class='btn btn-success' data-bs-toggle='modal' data-bs-target='#diplomaModal{$groupId}'>Agregar Constancias</button>
-                                                        <button type='button' class='btn btn-success' data-bs-toggle='modal' data-bs-target='#diplomaverModal{$groupId}'>Ver Constancias</button>
-                                                    <form action='grupo.php' method='post' style='display:inline-block;'>
-                                <input type='hidden' name='accion' value='finalizar'>
-                                <input type='hidden' name='grupo_id' value='{$groupId}'>
-                                <button type='submit' class='btn btn-success'>Finalizar Grupo</button>
-                            </form>
-                            <form action='grupo.php' method='post' style='display:inline-block;'>
-                                <input type='hidden' name='accion' value='cancelar'>
-                                <input type='hidden' name='grupo_id' value='{$groupId}'>
-                                <button type='submit' class='btn btn-danger'>Cancelar Grupo</button>
+      // Contar el número de alumnos en el grupo
+      $sqlCount = "SELECT COUNT(*) as count FROM alumnos WHERE Fk_Id_Grupo = ?";
+      $stmtCount = $conn->prepare($sqlCount);
+      $stmtCount->bind_param("i", $groupId);
+      $stmtCount->execute();
+      $resultCount = $stmtCount->get_result();
+      $count = $resultCount->fetch_assoc()['count'];
+
+      echo "<tr>
+              <td>{$groupNumber} ({$groupLetter})</td>
+              <td>{$row['NombreCurso']}</td>
+              <td>{$count}/{$row['Capacidad']}</td>
+              <td>{$row['FechaI']}</td>
+              <td>{$row['FechaF']}</td>
+              <td><button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#alumnosModal{$groupId}'>Ver Alumnos</button></td>
+              <td><button type='button' class='btn btn-primary btn-sm' data-bs-toggle='modal' data-bs-target='#aspirantesModal{$groupId}'>Ver Aspirantes</button></td>
+              <td>
+                  <button type='button' class='btn btn-warning' data-bs-toggle='modal' data-bs-target='#editarModal{$groupId}'>Editar</button>
+                  <button type='button' class='btn btn-success' data-bs-toggle='modal' data-bs-target='#diplomaModal{$groupId}'>Agregar Constancias</button>
+                  <button type='button' class='btn btn-success' data-bs-toggle='modal' data-bs-target='#diplomaverModal{$groupId}'>Ver Constancias</button>
+                  <form action='grupo.php' method='post' style='display:inline-block;'>
+                      <input type='hidden' name='accion' value='finalizar'>
+                      <input type='hidden' name='grupo_id' value='{$groupId}'>
+                      <button type='submit' class='btn btn-success'>Finalizar Grupo</button>
+                  </form>
+                  <form action='grupo.php' method='post' style='display:inline-block;'>
+                      <input type='hidden' name='accion' value='cancelar'>
+                      <input type='hidden' name='grupo_id' value='{$groupId}'>
+                      <button type='submit' class='btn btn-danger'>Cancelar Grupo</button>
+                  </form>
+
                             </form>
                                                     </td>
 
@@ -238,7 +296,7 @@ function getGroupNumber($id) {
                 if ($studentsResult->num_rows > 0) {
                     echo "<ul>";
                     while ($student = $studentsResult->fetch_assoc()) {
-                        echo "<li>{$student['vNombre']}</li>";
+                        echo "<li>{$student['vNombre']} {$student['vApellidoP']}</li>";
                     }
                     echo "</ul>";
                 } else {
@@ -271,7 +329,7 @@ function getGroupNumber($id) {
                 if ($applicationsResult->num_rows > 0) {
                     echo "<ul>";
                     while ($application = $applicationsResult->fetch_assoc()) {
-                        echo "<li>{$application['vNombre']}
+                        echo "<li>{$application['vNombre']} {$application['vApellidoP']}
                               <form method='POST' action='' style='display:inline;'>
                                 <input type='hidden' name='interes_id' value='{$application['id_Intereses']}'>
                                 <input type='hidden' name='accion' value='aceptar'>
@@ -412,41 +470,64 @@ echo "          </div>
         
         // Consulta para obtener los grupos finalizados
         $sqlFinalizados = "SELECT g.ClaveGrupo, g.FechaF, c.NombreCurso, g.Capacidad 
-                           FROM grupos_finalizados gf
-                           JOIN grupo g ON gf.Fk_id_Grupo = g.id_Grupo
-                           JOIN curso c ON gf.Fk_id_Curso = c.id_Curso";
-        $resultFinalizados = $conn->query($sqlFinalizados);
+        FROM grupos_finalizados gf
+        JOIN grupo g ON gf.Fk_id_Grupo = g.id_Grupo
+        JOIN curso c ON gf.Fk_id_Curso = c.id_Curso";
+$resultFinalizados = $conn->query($sqlFinalizados);
 
-        if ($resultFinalizados->num_rows > 0) {
-            echo "<h2 class='text-center mt-5'>Grupos Finalizados</h2>";
-            echo "<table class='table table-striped'>
-                    <thead>
-                        <tr>
-                            <th>Fecha de Fin</th>
-                            <th>Nombre del Curso</th>
-                            <th>Clave del Grupo</th>
-                            <th>Capacidad</th>
-                        </tr>
-                    </thead>
-                    <tbody>";
+if ($resultFinalizados->num_rows > 0) {
+echo "<h2 class='text-center mt-5'>Grupos Finalizados</h2>";
+echo "<button id='exportPdf' class='btn btn-danger mb-3'>Exportar a PDF</button>";
+echo "<button id='exportExcel' class='btn btn-success mb-3'>Exportar a Excel</button>";
+echo "<table id='gruposFinalizados' class='table table-striped'>
+ <thead>
+     <tr>
+         <th>Fecha de Fin</th>
+         <th>Nombre del Curso</th>
+         <th>Clave del Grupo</th>
+         <th>Capacidad</th>
+     </tr>
+ </thead>
+ <tbody>";
 
-            while ($row = $resultFinalizados->fetch_assoc()) {
-                echo "<tr>
-                        <td>{$row['FechaF']}</td>
-                        <td>{$row['NombreCurso']}</td>
-                        <td>{$row['ClaveGrupo']}</td>
-                        <td>{$row['Capacidad']}</td>
-                      </tr>";
-            }
-            echo "</tbody></table>";
-        } else {
-            echo "<p>No se encontraron grupos finalizados.</p>";
-        }
-
+while ($row = $resultFinalizados->fetch_assoc()) {
+echo "<tr>
+     <td>{$row['FechaF']}</td>
+     <td>{$row['NombreCurso']}</td>
+     <td>{$row['ClaveGrupo']}</td>
+     <td>{$row['Capacidad']}</td>
+   </tr>";
+}
+echo "</tbody></table>";
+} else {
+echo "<p>No se encontraron grupos finalizados.</p>";
+}
         $conn->close();
         ?>
     </div>
+    </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('exportPdf').addEventListener('click', function () {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text("Grupos Finalizados", 14, 16);
+        const rows = Array.from(document.querySelectorAll('#gruposFinalizados tbody tr')).map(tr => 
+            Array.from(tr.children).map(td => td.textContent)
+        );
+        const headers = Array.from(document.querySelectorAll('#gruposFinalizados thead th')).map(th => th.textContent);
+        doc.autoTable({ head: [headers], body: rows });
+        doc.save('grupos_finalizados.pdf');
+    });
+
+    document.getElementById('exportExcel').addEventListener('click', function () {
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.table_to_sheet(document.getElementById('gruposFinalizados'));
+        XLSX.utils.book_append_sheet(wb, ws, 'Grupos Finalizados');
+        XLSX.writeFile(wb, 'grupos_finalizados.xlsx');
+    });
+</script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

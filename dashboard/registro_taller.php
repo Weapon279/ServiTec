@@ -34,6 +34,14 @@
             <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
         </div>
         <div class="mb-3">
+            <label for="conocimientosCurso"  title='Conocimientos' class="form-label">Conocimientos requeridos</label>
+            <input type="text" class="form-control" id="conocimientosCurso" name="conocimientosCurso" required>
+        </div>
+        <div class="mb-3">
+            <label for="contenidoCurso"  title= 'En este apartado puede agregar el link donde el alumno podra vizualizar las herramientas del curso' title='Conocimientos' class="form-label">Contenido del curso</label>
+            <input type="text" class="form-control" id="contenidoCurso" name="contenidoCurso" required>
+        </div>
+        <div class="mb-3">
             <label for="modalidad" class="form-label">Modalidad</label>
             <select class="form-select" id="modalidad" name="modalidad" required>
                 <option value="Virtual">Virtual</option>

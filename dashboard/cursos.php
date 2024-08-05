@@ -19,21 +19,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $nombreCurso = isset($_POST['nombreCurso']) ? $_POST['nombreCurso'] : '';
                 $modalidad = isset($_POST['modalidad']) ? $_POST['modalidad'] : '';
                 $descripcionCurso = isset($_POST['descripcionCurso']) ? $_POST['descripcionCurso'] : '';
-                $conocimientoCurso = isset($_POST['ConocimientosCurso']) ? $_POST['ConocimientosCurso'] : '';
                 $contenidoCurso = isset($_POST['contenidoCurso']) ? $_POST['contenidoCurso'] : '';
                 $objectivoCurso = isset($_POST['objectivoCurso']) ? $_POST['objectivoCurso'] : '';
+                $conocimientoCurso = isset($_POST['conocimientosCurso']) ? $_POST['ConocimientosCurso'] : '';
                 $docenteConvoca = isset($_POST['DocenteConvoca']) ? $_POST['DocenteConvoca'] : '';
                 $capacidad = isset($_POST['capacidad']) ? $_POST['capacidad'] : '';
                 $costo = isset($_POST['costo']) ? $_POST['costo'] : '';
                 
                 $costo = $_POST['costo'];
                 $sql = "UPDATE curso 
-                        SET NombreCurso = '$nombreCurso', Modalidad = '$modalidad', DescripcionCurso = '$descripcionCurso', CostoCurso = '$costo' , ObjectivoCurso = '$objectivoCurso', ConocimientosCurso = '$conocimientoCurso'
+                        SET NombreCurso = '$nombreCurso', Modalidad = '$modalidad', DescripcionCurso = '$descripcionCurso', CostoCurso = '$costo' , ObjectivoCurso = '$objectivoCurso'
                         WHERE id_Curso = $courseId";
-                $conn->query($sql);
-                $sql = "UPDATE convocatoria 
-                        SET DocenteConvoca = '$docenteConvoca'
-                        WHERE Id_Convoca = (SELECT Fk_id_ofer FROM curso WHERE id_Curso = $courseId)";
+  
                 $conn->query($sql);
                 $sql = "UPDATE grupo 
                         SET Capacidad = '$capacidad', Status = 1 
@@ -44,8 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'delete':
                 // Eliminar curso
                 $sql = "UPDATE curso SET Status = 'Cancelado', FechaHoraC = NULL, FechaHoraA = NULL WHERE id_Curso = $courseId";
-                $conn->query($sql);
-                $sql = "UPDATE convocatoria SET DocenteConvoca = '' WHERE Id_Convoca = (SELECT Fk_id_ofer FROM curso WHERE id_Curso = $courseId)";
                 $conn->query($sql);
                 break;
 
@@ -65,8 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Concluir curso
                 $sql = "UPDATE curso SET FechaHoraC = NULL, FechaHoraA = NULL, Status = 'Concluir' WHERE id_Curso = $courseId";
                 $conn->query($sql);
-                $sql = "UPDATE convocatoria SET DocenteConvoca = '' WHERE Id_Convoca = (SELECT Fk_id_ofer FROM curso WHERE id_Curso = $courseId)";
-                $conn->query($sql);
+  
                 break;
 
                 case 'launch':
@@ -97,13 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
                       }
               
-                    
-                  
-                  
-              
-              
       
-
 
     }
 }
@@ -120,7 +108,7 @@ $totalPages = ceil($totalCourses / $resultsPerPage);
 $offset = ($page - 1) * $resultsPerPage;
 
 // Consulta SQL paginada con orden alfabético por nombre de curso
-$sql = "SELECT curso.id_Curso, curso.NombreCurso, curso.Modalidad, curso.DescripcionCurso, curso.ObjectivoCurso, curso.ConocimientosCurso, curso.ContenidoCurso, curso.FechaHoraC, curso.FechaHoraA, grupo.Capacidad, curso.CostoCurso, curso.Status , convocatoria.DocenteConvoca
+$sql = "SELECT curso.id_Curso, curso.NombreCurso, curso.Modalidad, curso.DescripcionCurso, curso.ContenidoCurso, curso.ObjectivoCurso, curso.ConocimientosCurso, curso.ContenidoCurso, curso.FechaHoraC, curso.FechaHoraA, grupo.Capacidad, curso.CostoCurso, curso.Status , convocatoria.DocenteConvoca
         FROM curso 
         LEFT JOIN grupo ON curso.id_Curso = grupo.Fk_id_Alumno
         LEFT JOIN convocatoria ON curso.Fk_id_ofer = convocatoria.Id_Convoca
@@ -245,10 +233,7 @@ $result = $conn->query($sql);
                     <label for='objectivoCurso' class='form-label'>Objetivo</label>
                     <input type='text' class='form-control' id='objectivoCurso' name='objectivoCurso' value='{$row['ObjectivoCurso']}' required>
                   </div>
-                  <div class='mb-3'>
-                    <label for='conocimientoCurso' class='form-label'>Conocimiento Curso</label>
-                    <input type='text' class='form-control' id='conocimientoCurso' name='conocimientoCurso' value='{$row['ConocimientosCurso']}' required>
-                  </div>
+
                   <div class='mb-3'>
                     <label for='contenidoCurso' class='form-label'>Contenido Curso</label>
                     <input type='text' class='form-control' id='contenidoCurso' name='contenidoCurso' value='{$row['ContenidoCurso']}' required>

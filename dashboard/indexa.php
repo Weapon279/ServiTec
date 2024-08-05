@@ -80,7 +80,7 @@ function generateMenu($user_type_id, $conn) {
 <!-- Top container -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-success fixed-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">SIGESEC</a>
+        <a class="navbar-brand" href="../index.php">SIGESEC</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -111,7 +111,6 @@ function generateMenu($user_type_id, $conn) {
     <hr>
 </div>
 
-<!-- Add your page content here -->
 
 <script src="https://kit.fontawesome.com/a076d05399.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,6 +1,9 @@
 <?php
 require 'modelo/conexion.php';
 
+$error = ''; // Variable para almacenar el mensaje de error
+$success = false; // Variable para almacenar el estado de éxito
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $vCorreo = $_POST['vCorreo'];
     $nPass = password_hash($_POST['nPass'], PASSWORD_DEFAULT); 
@@ -8,89 +11,74 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $vApellidoP = $_POST['vApellidoP'];
     $vApellidoM = $_POST['vApellidoM'];
     $nWhats = $_POST['nWhats'];
-    $curp = $_POST['curp']; // Obtener el CURP del formulario
+    $curp = $_POST['curp'];
     $Fk_TypeUser = 1;
     $bStatus = 'Activo'; 
 
     if (!is_numeric($nWhats) || $nWhats < 0 || $nWhats > 9999999999) {
-        echo "<script>
-        document.addEventListener('DOMContentLoadede', function() {
-            document.getElementById('modale').style.display = 'block';
-            setTimeout(function() {
-                window.location.href = 'registro.php';
-            }, 2000);
-        });
-      </script>";
-        exit();
-    }
-
-    // Validar que el CURP sea único
-    $stmt_check_curp = $conn->prepare("SELECT COUNT(*) FROM user WHERE curp = :curp");
-    $stmt_check_curp->bindParam(':curp', $curp);
-    $stmt_check_curp->execute();
-    
-    if ($stmt_check_curp->fetchColumn() > 0) {
-        echo "El CURP ya está en uso. Por favor, ingrese uno diferente.";
-        exit();
-    }
-
-    try {
-        $conn->beginTransaction(); // Inicia una transacción
+        $error = 'Número de WhatsApp inválido.';
+        $success = false;
+    } else {
+        // Validar que el CURP sea único
+        $stmt_check_curp = $conn->prepare("SELECT COUNT(*) FROM user WHERE curp = :curp");
+        $stmt_check_curp->bindParam(':curp', $curp);
+        $stmt_check_curp->execute();
         
-        // Insertar usuario en la tabla user
-        $stmt_user = $conn->prepare("INSERT INTO user (vCorreo, nPass, vNombre, vApellidoP, vApellidoM, nWhats, curp, Fk_TypeUser, bStatus, iFechaHoraC, iFechaHoraA) VALUES (:vCorreo, :nPass, :vNombre, :vApellidoP, :vApellidoM, :nWhats, :curp, :Fk_TypeUser, :bStatus, NOW(), NOW())");
-        
-        $stmt_user->bindParam(':vCorreo', $vCorreo);
-        $stmt_user->bindParam(':nPass', $nPass);
-        $stmt_user->bindParam(':vNombre', $vNombre);
-        $stmt_user->bindParam(':vApellidoP', $vApellidoP);
-        $stmt_user->bindParam(':vApellidoM', $vApellidoM);
-        $stmt_user->bindParam(':nWhats', $nWhats, PDO::PARAM_INT); 
-        $stmt_user->bindParam(':curp', $curp);
-        $stmt_user->bindParam(':Fk_TypeUser', $Fk_TypeUser, PDO::PARAM_INT);
-        $stmt_user->bindParam(':bStatus', $bStatus);
-
-        if ($stmt_user->execute()) {
-            // Obtener el ID del usuario insertado
-            $Fk_id_User = $conn->lastInsertId();
-            
-            // Insertar en la tabla alumnos
-            $stmt_alumno = $conn->prepare("INSERT INTO alumnos (Fk_id_User, Status, FechaHoraC, FechaHoraA) VALUES (:Fk_id_User, 1, NOW(), NOW())");
-            $stmt_alumno->bindParam(':Fk_id_User', $Fk_id_User, PDO::PARAM_INT);
-            $stmt_alumno->execute();
-            
-            $conn->commit(); // Confirmar la transacción
-
-            echo "<script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        document.getElementById('modal').style.display = 'block';
-                        setTimeout(function() {
-                            window.location.href = 'login.php';
-                        }, 2000);
-                    });
-                  </script>";
-            
-            // Notificación para el administrador
-            $mensaje = "Nuevo usuario registrado: {$vNombre} {$vApellidoP}";
-            $tipo = "registro_usuario";
-
-            $sql = "INSERT INTO notificaciones (Tipo, Mensaje) VALUES (:tipo, :mensaje)";
-            $stmt_notif = $conn->prepare($sql);
-            $stmt_notif->bindParam(':tipo', $tipo);
-            $stmt_notif->bindParam(':mensaje', $mensaje);
-            $stmt_notif->execute();
+        if ($stmt_check_curp->fetchColumn() > 0) {
+            $error = 'Usuario ya registrada.';
+            $success = false;
         } else {
-            echo "Error al registrar el usuario.";
+            try {
+                $conn->beginTransaction();
+                
+                // Insertar usuario en la tabla user
+                $stmt_user = $conn->prepare("INSERT INTO user (vCorreo, nPass, vNombre, vApellidoP, vApellidoM, nWhats, curp, Fk_TypeUser, bStatus, iFechaHoraC, iFechaHoraA) VALUES (:vCorreo, :nPass, :vNombre, :vApellidoP, :vApellidoM, :nWhats, :curp, :Fk_TypeUser, :bStatus, NOW(), NOW())");
+                
+                $stmt_user->bindParam(':vCorreo', $vCorreo);
+                $stmt_user->bindParam(':nPass', $nPass);
+                $stmt_user->bindParam(':vNombre', $vNombre);
+                $stmt_user->bindParam(':vApellidoP', $vApellidoP);
+                $stmt_user->bindParam(':vApellidoM', $vApellidoM);
+                $stmt_user->bindParam(':nWhats', $nWhats, PDO::PARAM_INT); 
+                $stmt_user->bindParam(':curp', $curp);
+                $stmt_user->bindParam(':Fk_TypeUser', $Fk_TypeUser, PDO::PARAM_INT);
+                $stmt_user->bindParam(':bStatus', $bStatus);
+
+                if ($stmt_user->execute()) {
+                    // Obtener el ID del usuario insertado
+                    $Fk_id_User = $conn->lastInsertId();
+                    
+                    // Insertar en la tabla alumnos
+                    $stmt_alumno = $conn->prepare("INSERT INTO alumnos (Fk_id_User, Status, FechaHoraC, FechaHoraA) VALUES (:Fk_id_User, 1, NOW(), NOW())");
+                    $stmt_alumno->bindParam(':Fk_id_User', $Fk_id_User, PDO::PARAM_INT);
+                    $stmt_alumno->execute();
+                    
+                    $conn->commit();
+
+                    $success = true;
+
+                    // Notificación para el administrador
+                    $mensaje = "Nuevo usuario registrado: {$vNombre} {$vApellidoP}";
+                    $tipo = "registro_usuario";
+
+                    $sql = "INSERT INTO notificaciones (Tipo, Mensaje) VALUES (:tipo, :mensaje)";
+                    $stmt_notif = $conn->prepare($sql);
+                    $stmt_notif->bindParam(':tipo', $tipo);
+                    $stmt_notif->bindParam(':mensaje', $mensaje);
+                    $stmt_notif->execute();
+                } else {
+                    $error = 'Error al registrar el usuario.';
+                    $success = false;
+                }
+            } catch (PDOException $e) {
+                $conn->rollBack();
+                $error = "Error: " . $e->getMessage();
+                $success = false;
+            }
         }
-    } catch (PDOException $e) {
-        $conn->rollBack(); // Revertir la transacción en caso de error
-        echo "Error: " . $e->getMessage();
     }
 }
 ?>
-
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -98,92 +86,53 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css"> <!-- Enlace al archivo CSS -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <style>
-    /* style.css */
+    /* Estilos de modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+        padding-top: 60px;
+    }
 
-/* Ajustes generales para el body */
-body {
-    font-family: 'Raleway', sans-serif;
-}
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        border-radius: 10px;
+        text-align: center;
+    }
 
-/* Estilo para el contenedor principal */
-.container {
-    max-width: 100%;
-    padding: 20px;
-}
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
 
-/* Estilo para la tarjeta de registro */
-.card {
-    border-radius: 10px;
-}
-
-/* Estilo para los botones */
-.btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
-}
-
-.btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #004085;
-}
-
-/* Estilo para el enlace de inicio de sesión */
-.psw a {
-    color: #007bff;
-}
-
-.psw a:hover {
-    text-decoration: underline;
-}
-
-/* Estilo para el modal */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
-    padding-top: 60px;
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: 5% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 500px;
-    border-radius: 10px;
-    text-align: center;
-}
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
-
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
 </style>
 <body class="bg-light">
     <div class="container d-flex align-items-center justify-content-center min-vh-100">
         <div class="card p-4 shadow-lg w-100" style="max-width: 400px;">
             <h2 class="text-center mb-4">Registro</h2>
-            <?php if (isset($error)): ?>
+            <?php if ($error): ?>
                 <div class="alert alert-danger"><?php echo $error; ?></div>
             <?php endif; ?>
             <form method="POST" action="registro.php">
@@ -226,69 +175,39 @@ body {
         </div>
     </div>
 
-    <!-- Modal -->
-    <div id="modal" class="modal">
+    <!-- Modal de éxito -->
+    <div id="modal" class="modal" style="<?php echo $success ? 'display: block;' : ''; ?>">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <p>Usuario registrado con éxito. Inicia sesión</p>
+            <p>Usuario registrado con éxito. Inicia sesión.</p>
         </div>
     </div>
-        <!-- Modal -->
-        <div id="modale" class="modal">
+
+    <!-- Modal de error -->
+    <div id="modale" class="modal" style="<?php echo $error ? 'display: block;' : ''; ?>">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <p>Error al registrar Numero de celular</p>
+            <p><?php echo $error ? $error : 'Error desconocido.'; ?></p>
         </div>
     </div>
 
     <script>
-        // Script para cerrar el modal y redirigir después de 2 segundos
         document.addEventListener('DOMContentLoaded', function() {
             var modal = document.getElementById('modal');
-            var span = document.getElementsByClassName('close')[0];
+            var modale = document.getElementById('modale');
+            var closeButtons = document.querySelectorAll('.close');
 
-            if (modal.style.display == 'block') {
-                setTimeout(function() {
+            closeButtons.forEach(function(btn) {
+                btn.onclick = function() {
                     modal.style.display = 'none';
-                    window.location.href = 'login.php';
-                }, 2000);
-            }
-
-            // Cuando el usuario hace clic en <span> (x), cierra el modal
-            span.onclick = function() {
-                modal.style.display = 'none';
-            }
-
-            // Cuando el usuario hace clic fuera del modal, lo cierra
-            window.onclick = function(event) {
-                if (event.target == modal) {
-                    modal.style.display = 'none';
+                    modale.style.display = 'none';
                 }
-            }
-        });
-    </script>
-        <script>
-        // Script para cerrar el modal y redirigir después de 2 segundos
-        document.addEventListener('DOMContentLoadede', function() {
-            var modal = document.getElementById('modale');
-            var span = document.getElementsByClassName('close')[0];
+            });
 
-            if (modal.style.display == 'block') {
-                setTimeout(function() {
-                    modal.style.display = 'none';
-                    window.location.href = 'login.php';
-                }, 2000);
-            }
-
-            // Cuando el usuario hace clic en <span> (x), cierra el modal
-            span.onclick = function() {
-                modal.style.display = 'none';
-            }
-
-            // Cuando el usuario hace clic fuera del modal, lo cierra
             window.onclick = function(event) {
-                if (event.target == modal) {
+                if (event.target === modal || event.target === modale) {
                     modal.style.display = 'none';
+                    modale.style.display = 'none';
                 }
             }
         });

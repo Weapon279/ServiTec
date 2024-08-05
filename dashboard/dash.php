@@ -19,6 +19,11 @@ function contarServicios($conn, $status) {
     return $row['total'];
 }
 
+// Evitar que el usuario vuelva a la página anterior después de cerrar sesión
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
+
 // Obtener datos de los servicios
 $serviciosEnCurso = contarServicios($conn, 'Disponible');
 $serviciosSinFecha = contarServicios($conn, 'Falta Informacion');
@@ -33,11 +38,11 @@ $usuarios = $resultUsuarios->fetch_assoc()['total'];
 $sqlProximosCursos = "SELECT id_Curso, NombreCurso, Modalidad, FechaHoraC, FechaHoraA, Status FROM curso";
 $resultProximosCursos = $conn->query($sqlProximosCursos);
 
-$sqlCursosVendidos = "SELECT g.id_Grupo,g.ClaveGrupo, c.NombreCurso, c.Modalidad, g.FechaF
-                      FROM grupo g
-                      JOIN curso c ON g.Fk_id_Curso = c.id_Curso
-                      WHERE g.FechaF < NOW()";
-$resultCursosVendidos = $conn->query($sqlCursosVendidos);
+$sqlCursosCancelados = "SELECT g.ClaveGrupo, c.NombreCurso, g.FechaHoraA
+                        FROM grupo g
+                        JOIN curso c ON g.Fk_id_Curso = c.id_Curso
+                        WHERE g.Status = 0";
+$resultCursosCancelados = $conn->query($sqlCursosCancelados);
 
 // Obtener datos para el gráfico de cursos vendidos
 $sqlGraficoCursosVendidos = "SELECT NombreCurso, ClaveGrupo, COUNT(*) AS totalVendidos,ClaveGrupo 
@@ -71,6 +76,9 @@ $conn->close();
     <style>
         html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -158,34 +166,35 @@ $conn->close();
     </div>
 
     <!-- Cursos vendidos con fecha de finalización pasada -->
-    <div class="col-md-12 mt-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Servicios Cancelados</h5>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
+
+<div class="col-md-12 mt-4">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Servicios Cancelados</h5>
+            <button class="btn btn-primary mb-3" onclick="exportTableToPDF('tablaServiciosCancelados')">Exportar a PDF</button>
+            <button class="btn btn-success mb-3" onclick="exportTableToExcel('tablaServiciosCancelados')">Exportar a Excel</button>
+            <table class="table table-striped" id="tablaServiciosCancelados">
+                <thead>
+                    <tr>
                         <th>Clave del Grupo</th>
-                            <th>Nombre del Curso</th>
-                            <th>Modalidad</th>
-                            <th>Fecha de Finalización</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php while($row = $resultCursosVendidos ->fetch_assoc()) {
-                            echo "<tr>
-                                     <td>" . $row['ClaveGrupo'] . "</td>
-                                    <td>" . $row['NombreCurso'] . "</td>
-                                    <td>" . $row['Modalidad'] . "</td>
-                                    <td>" . $row['FechaF'] . "</td>
-                                  </tr>";
-                        } ?>
-                    </tbody>
-                </table>
-            </div>
+                        <th>Nombre del Curso</th>
+                        <th>FechaHoraA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php while($row = $resultCursosCancelados->fetch_assoc()) {
+                        echo "<tr>
+                                <td>" . $row['ClaveGrupo'] . "</td>
+                                <td>" . $row['NombreCurso'] . "</td>
+                                <td>" . $row['FechaHoraA'] . "</td>
+                              </tr>";
+                    } ?>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -215,6 +224,21 @@ $conn->close();
             }
         }
     });
+
+    // Funciones para exportar tablas
+    function exportTableToPDF(tableId) {
+        var { jsPDF } = window.jspdf;
+        var doc = new jsPDF();
+
+        doc.autoTable({ html: '#' + tableId });
+        doc.save('table.pdf');
+    }
+
+    function exportTableToExcel(tableId) {
+        var table = document.getElementById(tableId);
+        var wb = XLSX.utils.table_to_book(table, { sheet: "Sheet JS" });
+        XLSX.writeFile(wb, 'table.xlsx');
+    }
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

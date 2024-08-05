@@ -9,6 +9,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nombreCurso = $_POST['nombreCurso'];
     $docente = $_POST['docente'];
     $descripcion = $_POST['descripcion'];
+    $conocimientosCurso = $_POST['conocimientosCurso'];
+    $contenidoCurso = $_POST['contenidoCurso'];
     $modalidad = $_POST['modalidad'];
     $tipo = $_POST['tipo'];
     $status = 'Falta Informacion';
@@ -58,8 +60,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $ofertaId = $conn->insert_id; // Obtener el ID de la oferta insertada
 
             // Insertar en la tabla `curso`
-            $sqlCurso = "INSERT INTO curso (Fk_id_ofer, NombreCurso, DescripcionCurso, Modalidad, TipoSer, CostoCurso, ImagenCurso, Status, FechaHoraC) 
-                         VALUES ('$ofertaId', '$nombreCurso', '$descripcion', '$modalidad', '$tipo', '$costo', '$target_file', '$status', NOW())";
+            $sqlCurso = "INSERT INTO curso (Fk_id_ofer, NombreCurso, DescripcionCurso, ConocimientosCurso, ContenidoCurso, Modalidad , TipoSer, CostoCurso, ImagenCurso, Status, FechaHoraC) 
+                         VALUES ('$ofertaId', '$nombreCurso', '$descripcion', '$conocimientosCurso', ' $contenidoCurso ', '$modalidad', '$tipo', '$costo', '$target_file', '$status', NOW())";
 
             if ($conn->query($sqlCurso) === TRUE) {
                 $cursoId = $conn->insert_id;  // Obtener el ID del curso insertado
@@ -68,7 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
        
                     // Redirigir al usuario a "cursos.php" después de 3 segundos
-                    header("Refresh: 3; url=cursos.php");
+                    header("Refresh: 1; url=cursos.php");
                     exit;
                 } else {
                     $response["error"] = "Error: " . $conn->error;

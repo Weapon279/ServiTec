@@ -1,5 +1,4 @@
 <?php
-session_start();
 include 'indexa.php';
 require 'conexion.php';
 

@@ -179,7 +179,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div id="modal" class="modal" style="<?php echo $success ? 'display: block;' : ''; ?>">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <p>Usuario registrado con éxito. Inicia sesión.</p>
+            <p>Usuario registrado con éxito. <a href="login.php">Inicia Sesión</a></p>
         </div>
     </div>
 

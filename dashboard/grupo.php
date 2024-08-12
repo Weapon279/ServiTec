@@ -221,7 +221,7 @@ if ($result->num_rows > 0) {
           <thead>
               <tr>
                   <th>Clave del Grupo</th>
-                  <th>Nombre del Curso</th>
+                  <th>Nombre del Servicio</th>
                   <th>Capacidad</th>
                   <th>Fecha de Inicio</th>
                   <th>Fecha de Fin</th>

@@ -14,14 +14,17 @@ try {
                 c.Modalidad,
                 c.CostoCurso,
                 c.ImagenCurso,
-                o.NombreOfer
-                
+                o.NombreOfer,
+                g.FechaFin,               -- Nueva columna
+                conv.DocenteConvoca       -- Nueva columna
             FROM 
                 curso c
             JOIN 
                 oferta o ON c.Fk_id_ofer = o.id_ofer
-                            LEFT JOIN 
+            LEFT JOIN 
                 convocatoria conv ON conv.Fk_id_Curso = c.id_Curso
+            LEFT JOIN 
+                grupo g ON conv.Fk_id_Grupo = g.id_Grupo -- Unir la tabla grupo
             WHERE 
                 c.Status = 'Falta Informacion'
             ORDER BY c.FechaHoraC ASC
@@ -34,6 +37,7 @@ try {
     echo "Error: " . $e->getMessage();
 }
 ?>
+
 
 <?php
 try {
@@ -466,7 +470,7 @@ body {
 <div class="w3-container w3-light-grey" style="padding:128px 16px">
   <div class="w3-row-padding">
     <div class="w3-col m6">
-      <h3>Reconocimientos.</h3>
+      <h3>Noticias.</h3>
       
       <?php
 try {
@@ -506,7 +510,7 @@ $conn = null;
 
 <!-- Próximos Cursos -->
 <div class="w3-container" style="padding:128px 16px" id="">
-  <h3 class="w3-center">Próximos Cursos</h3>
+  <h3 class="w3-center">Próximos Cursos, Talleres, Webinar y Servicios Tecnologicos</h3>
   <p class="w3-center w3-large">¡INSCRÍBETE AHORA!</p>
 
   <?php if (!empty($cursos)) { ?>
@@ -517,9 +521,7 @@ $conn = null;
         <div class="w3-container">
             <h3><?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?></h3>
             <p><?php echo htmlspecialchars($curso['DescripcionCurso'] ?? ''); ?></p>
-            <p>Docente: <?php echo htmlspecialchars($curso['NombreDoc'] ?? ''); ?></p>
             <p>Fecha Inicio: <?php echo htmlspecialchars($curso['FechaHoraC'] ?? ''); ?></p>
-            <p>Termino: <?php echo htmlspecialchars($curso['FechaHoraA'] ?? ''); ?></p>
             <p>Modalidad: <?php echo htmlspecialchars($curso['Modalidad'] ?? ''); ?></p>
             <p>Costo: $<?php echo htmlspecialchars($curso['CostoCurso'] ?? ''); ?></p>
             <p><a href="login.php" class="w3-button w3-green-custom w3-block"><i class="fa fa-user"> </i> ¡Registrarme ahora!</a></p>
@@ -558,7 +560,7 @@ $conn = null;
 
 <!-- Servicios -->
 <div class="w3-container" style="padding:128px 16px" id="servicios">
-  <h3 class="w3-center">SERVICIOS</h3>
+  <h3 class="w3-center">Servicios disponibles Cursos, Talleres, Webinar y Servicios Tecnologicos</h3>
   <p class="w3-center w3-large">Cursos de calidad para gente de calidad</p>
 
   <div class="w3-row-padding" style="margin-top:64px">
@@ -570,7 +572,6 @@ $conn = null;
             <div class="w3-container">
               <h3><?php echo htmlspecialchars($curso['NombreCurso'] ?? ''); ?></h3>
               <p><?php echo htmlspecialchars($curso['DescripcionCurso'] ?? ''); ?></p>
-              <p>Docente: <?php echo htmlspecialchars($curso['DocenteConvoca'] ?? ''); ?></p>
               <p>Modalidad: <?php echo htmlspecialchars($curso['Modalidad'] ?? ''); ?></p>
               <p>Costo: $<?php echo htmlspecialchars($curso['CostoCurso'] ?? ''); ?></p>
               <p><a href="login.php" class="w3-button w3-green-custom w3-block"><i class="fa fa-user"> </i> ¡Registrarme ahora!</a></p>
@@ -685,8 +686,8 @@ $conn = null;
     <i class="fa fa-twitter w3-hover-opacity"></i>
     <i class="fa fa-linkedin w3-hover-opacity"></i>
   </div>
-  
   <p> <a href="https://utem.edu.mx/" title="W3.CSS" target="_blank" class="w3-hover-text-green">Univiersidad Tecnologica de Manzanillo</a></p>
+  Hecho Por: Alan Vasconcelos 
 </footer>
    </div>
 

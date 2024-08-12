@@ -54,6 +54,7 @@
             <select class="form-select" id="tipo" name="tipo" required>
                 <option value="Curso">Curso</option>
                 <option value="Taller">Taller</option>
+                <option value="Webinar">Webinar</option>
                 <option value="Servicio Tecnologico">Servicio Tecnologico</option>
             </select>
         </div>
@@ -62,16 +63,16 @@
             <input type="number" class="form-control" id="costo" name="costo" required>
         </div>
         <div class="mb-3">
-            <label for="claveGrupo"  title='Recomendacion de registro Curso= Tipo de servicio IS=Ingeneria de software 001= ID del servicio 2024= Año en curso "CIS001-2024"' class="form-label">Clave del Grupo</label>
-            <input type="text" class="form-control" id="claveGrupo" name="claveGrupo" required>
-        </div>
-        <div class="mb-3">
             <label for="capacidad" class="form-label">Capacidad</label>
             <input type="number" class="form-control" id="capacidad" name="capacidad" required>
         </div>
         <div class="mb-3">
             <label for="imagen" class="form-label">Imagen del Curso</label>
             <input type="file" class="form-control" id="imagen" name="imagen" required>
+        </div>
+        <div class="mb-3">
+            <label for="pdf" class="form-label">Imagen del Curso</label>
+            <input type="file" class="form-control" id="pdf" name="pdf" required>
         </div>
         <button type="submit" class="btn btn-primary">Registrar</button>
     </form>

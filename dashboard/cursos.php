@@ -138,7 +138,7 @@ $result = $conn->query($sql);
   <table class="table table-striped">
     <thead>
       <tr>
-        <th><a href="?sort=name_asc">Nombre del Curso</a></th>
+        <th><a href="?sort=name_asc">Nombre del Servicio</a></th>
         <th>Modalidad</th>
         <th>Descripción</th>
         <th>Objectivo</th>

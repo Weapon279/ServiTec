@@ -178,7 +178,7 @@ $conn->close();
                     <tr>
                         <th>Clave del Grupo</th>
                         <th>Nombre del Curso</th>
-                        <th>FechaHoraA</th>
+                        <th>Fecha y Hora</th>
                     </tr>
                 </thead>
                 <tbody>

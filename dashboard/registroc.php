@@ -21,13 +21,24 @@ $totalRegistros = $resultCount->fetch_assoc()['total'];
 $totalPaginas = ceil($totalRegistros / $porPagina);
 
 // Consulta para obtener los registros paginados
-$sql = "SELECT c.id_Curso, g.id_Grupo, c.NombreCurso, c.ObjectivoCurso, c.Modalidad, c.DescripcionCurso, c.CostoCurso, 
-            g.FechaI, g.FechaF, g.Capacidad, g.Costo
+$sql = "SELECT c.id_Curso, g.id_Grupo, c.NombreCurso, c.ObjectivoCurso, c.Modalidad, 
+               c.DescripcionCurso, c.CostoCurso, g.FechaI, g.FechaF, g.Capacidad, g.Costo, 
+               c.ConocimientosCurso, c.ContenidoCurso, c.pdf
         FROM curso c
         JOIN grupo g ON c.id_Curso = g.Fk_id_Curso
         WHERE c.Status IN ('Disponible', 'Falta Informacion')
         AND g.Status = 1
         LIMIT ?, ?";
+
+$conocimientosCurso = isset($_POST['ConocimientosCurso']) ? $_POST['ConocimientosCurso'] : '';
+$contenidoCurso = isset($_POST['ContenidoCurso']) ? $_POST['ContenidoCurso'] : '';
+
+// Asegúrate de que la ruta se genere correctamente incluso si la columna `pdf` está vacía
+$pdf = isset($row['pdf']) && !empty($row['pdf']) ? "pdf/{$row['pdf']}" : "#";
+$pdfFilename = basename($pdf); // Nombre del archivo PDF
+
+
+
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("ii", $inicio, $porPagina);
 $stmt->execute();
@@ -98,11 +109,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['join_group'])) {
     <table class="table mt-5">
         <thead>
             <tr>
-                <th>Nombre Curso</th>
-                <th>Objectivo Curso</th>
+                <th>Nombre del Servicio</th>
+                <th>Objectivo del Servicio</th>
                 <th>Modalidad</th>
-                <th>Descripción Curso</th>
-                <th>Costo Curso</th>
+                <th>Descripción del Servicio</th>
+                <th>Costo del Servicio</th>
                 <th>Fecha Inicio Grupo</th>
                 <th>Fecha Fin Grupo</th>
                 <th>Capacidad del Grupo</th>
@@ -113,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['join_group'])) {
         <?php
             while ($row = $result->fetch_assoc()) {
                 echo "<tr>
-                        <td>{$row['NombreCurso']}</td>
+                        <td><a href='#' data-bs-toggle='modal' data-bs-target='#cursoModal{$row['id_Curso']}'>{$row['NombreCurso']}</a></td>
                         <td>{$row['ObjectivoCurso']}</td>
                         <td>{$row['Modalidad']}</td>
                         <td>{$row['DescripcionCurso']}</td>
@@ -129,6 +140,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['join_group'])) {
                             </form>
                         </td>
                     </tr>";
+
+                // Modal con la información del curso
+                echo "
+                <div class='modal fade' id='cursoModal{$row['id_Curso']}' tabindex='-1' aria-labelledby='cursoModalLabel{$row['id_Curso']}' aria-hidden='true'>
+                    <div class='modal-dialog'>
+                        <div class='modal-content'>
+                            <div class='modal-header'>
+                                <h5 class='modal-title' id='cursoModalLabel{$row['id_Curso']}'>{$row['NombreCurso']}</h5>
+                                <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+                            </div>
+                            <div class='modal-body'>
+                                <p><strong>Objetivo:</strong> {$row['ObjectivoCurso']}</p>
+                                <p><strong>Modalidad:</strong> {$row['Modalidad']}</p>
+                                <p><strong>Descripción:</strong> {$row['DescripcionCurso']}</p>
+                             <p><strong>Descripción:</strong> {$row['ConocimientosCurso']}</p>
+                               <p><strong>Descripción:</strong> {$row['ContenidoCurso']}</p>
+                                <p><strong>Costo:</strong> {$row['CostoCurso']}</p>
+                        <a href='{$pdf}' download='{$pdfFilename}' class='btn btn-info'>Descargar PDF</a>
+                            </div>
+                            <div class='modal-footer'>
+                                <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>";
             }
         ?>
         </tbody>
